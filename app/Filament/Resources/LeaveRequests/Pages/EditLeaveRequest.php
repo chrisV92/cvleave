@@ -28,6 +28,8 @@ class EditLeaveRequest extends EditRecord
             $data['status'] = LeaveRequest::STATUS_PENDING;
         }
 
+        $data['end_date'] ??= $data['start_date'];
+
         return $data;
     }
 

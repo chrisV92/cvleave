@@ -15,11 +15,17 @@ class LeaveRequest extends Model
     const STATUS_REJECTED = 'rejected';
     const STATUS_CANCELLED = 'cancelled';
 
+    const DURATION_FULL_DAY = 'full_day';
+    const DURATION_HALF_DAY = 'half_day';
+    const DURATION_HOURS = 'hours';
+
     protected $fillable = [
         'user_id',
         'leave_type_id',
         'start_date',
         'end_date',
+        'duration_type',
+        'hours',
         'days_count',
         'status',
         'note',
@@ -34,6 +40,8 @@ class LeaveRequest extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'reviewed_at' => 'datetime',
+            'hours' => 'float',
+            'days_count' => 'float',
         ];
     }
 

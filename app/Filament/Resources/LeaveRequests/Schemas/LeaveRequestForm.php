@@ -32,21 +32,56 @@ class LeaveRequestForm
                     ->required()
                     ->live(),
 
+                Select::make('duration_type')
+                    ->label(__('Τύπος Διάρκειας'))
+                    ->options([
+                        'full_day' => __('Ολόκληρη Μέρα'),
+                        'half_day' => __('Μισή Μέρα'),
+                        'hours' => __('Ώρες'),
+                    ])
+                    ->default('full_day')
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, $get, $set) {
+                        if ($state !== 'full_day' && $get('start_date')) {
+                            $set('end_date', $get('start_date'));
+                        }
+                        self::recalculateDays($get, $set);
+                    }),
+
                 DatePicker::make('start_date')
                     ->label(__('Από'))
                     ->required()
                     ->live()
-                    ->afterStateUpdated(fn ($state, $get, $set) => self::recalculateDays($get, $set)),
+                    ->afterStateUpdated(function ($state, $get, $set) {
+                        if ($get('duration_type') !== 'full_day') {
+                            $set('end_date', $state);
+                        }
+                        self::recalculateDays($get, $set);
+                    }),
 
                 DatePicker::make('end_date')
                     ->label(__('Έως'))
-                    ->required()
+                    ->required(fn ($get) => ($get('duration_type') ?? 'full_day') === 'full_day')
                     ->live()
+                    ->visible(fn ($get) => ($get('duration_type') ?? 'full_day') === 'full_day')
+                    ->dehydrated()
                     ->afterStateUpdated(fn ($state, $get, $set) => self::recalculateDays($get, $set))
                     ->afterOrEqual('start_date'),
 
+                TextInput::make('hours')
+                    ->label(__('Ώρες'))
+                    ->numeric()
+                    ->minValue(0.5)
+                    ->maxValue(7.5)
+                    ->step(0.5)
+                    ->visible(fn ($get) => $get('duration_type') === 'hours')
+                    ->required(fn ($get) => $get('duration_type') === 'hours')
+                    ->live()
+                    ->afterStateUpdated(fn ($get, $set) => self::recalculateDays($get, $set)),
+
                 TextInput::make('days_count')
-                    ->label(__('Εργάσιμες μέρες'))
+                    ->label(__('Μέρες (ισοδύναμο)'))
                     ->numeric()
                     ->required()
                     ->disabled()
@@ -88,9 +123,29 @@ class LeaveRequestForm
     protected static function recalculateDays($get, $set): void
     {
         $start = $get('start_date');
+
+        if (! $start) {
+            return;
+        }
+
+        $unit = $get('duration_type') ?? 'full_day';
+
+        if ($unit === 'hours') {
+            $hours = (float) ($get('hours') ?? 0);
+            $set('days_count', round($hours / 8, 3));
+
+            return;
+        }
+
+        if ($unit === 'half_day') {
+            $set('days_count', 0.5);
+
+            return;
+        }
+
         $end = $get('end_date');
 
-        if (! $start || ! $end) {
+        if (! $end) {
             return;
         }
 

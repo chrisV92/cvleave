@@ -45,7 +45,18 @@ class LeaveRequestsTable
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('days_count')
-                    ->label(__('Μέρες')),
+                    ->label(__('Μέρες'))
+                    ->formatStateUsing(function ($state, LeaveRequest $record) {
+                        if ($record->duration_type === LeaveRequest::DURATION_HOURS) {
+                            return __(':hours ώρες', ['hours' => rtrim(rtrim(number_format((float) $record->hours, 2), '0'), '.')]);
+                        }
+
+                        if ($record->duration_type === LeaveRequest::DURATION_HALF_DAY) {
+                            return __('Μισή μέρα');
+                        }
+
+                        return rtrim(rtrim(number_format((float) $state, 3), '0'), '.');
+                    }),
                 BadgeColumn::make('status')
                     ->label(__('Κατάσταση'))
                     ->colors([

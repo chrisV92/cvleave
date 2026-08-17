@@ -25,6 +25,15 @@ class LeaveRequestExporter extends Exporter
             ExportColumn::make('end_date')
                 ->label(__('Έως'))
                 ->formatStateUsing(fn ($state) => $state?->format('d/m/Y')),
+            ExportColumn::make('duration_type')
+                ->label(__('Τύπος Διάρκειας'))
+                ->formatStateUsing(fn (string $state) => match ($state) {
+                    'half_day' => __('Μισή Μέρα'),
+                    'hours' => __('Ώρες'),
+                    default => __('Ολόκληρη Μέρα'),
+                }),
+            ExportColumn::make('hours')
+                ->label(__('Ώρες')),
             ExportColumn::make('days_count')
                 ->label(__('Μέρες')),
             ExportColumn::make('status')

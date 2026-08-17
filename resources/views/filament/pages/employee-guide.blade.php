@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'dashboard',
-        ids: ['dashboard', 'submit-request', 'your-requests', 'export-report', 'notifications', 'language-account'],
+        ids: ['dashboard', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -40,10 +40,11 @@
             <ul class="kb-toc">
                 <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">1. {{ __('Ο Πίνακας Ελέγχου σου') }}</a></li>
                 <li><a href="#submit-request" :class="active === 'submit-request' && 'kb-toc-active'">2. {{ __('Πώς να υποβάλεις αίτηση άδειας') }}</a></li>
-                <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">3. {{ __('Οι Αιτήσεις σου') }}</a></li>
-                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">4. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
-                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">5. {{ __('Ειδοποιήσεις') }}</a></li>
-                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">6. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
+                <li><a href="#partial-leave" :class="active === 'partial-leave' && 'kb-toc-active'">3. {{ __('Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)') }}</a></li>
+                <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">4. {{ __('Οι Αιτήσεις σου') }}</a></li>
+                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">5. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
+                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">6. {{ __('Ειδοποιήσεις') }}</a></li>
+                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">7. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -70,6 +71,17 @@
             </ol>
             <img src="{{ asset('img/kb/03-employee-create-request.png') }}" class="kb-shot" alt="Create leave request form">
             <p><strong>{{ __('Σημείωση:') }}</strong> {{ __('το σύστημα δεν σου επιτρέπει να υποβάλεις αίτηση που επικαλύπτεται με άλλη σου άδεια, ή που ξεπερνάει το διαθέσιμο υπόλοιπό σου — θα δεις μήνυμα σφάλματος αν συμβεί αυτό.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="partial-leave" heading="{{ __('Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)') }}" icon="heroicon-o-clock">
+        <div class="kb-section">
+            <p>{{ __('Στο πεδίο "Τύπος Διάρκειας" μπορείς να επιλέξεις εκτός από "Ολόκληρη Μέρα":') }}</p>
+            <ul>
+                <li>{{ __('"Μισή Μέρα" — η άδεια αφορά μία μόνο ημερομηνία και μετράει 0.5 μέρα από το υπόλοιπό σου.') }}</li>
+                <li>{{ __('"Ώρες" — επιλέγεις πόσες ώρες (έως 7.5) θα λείψεις μέσα σε μία ημερομηνία. Το σύστημα μετατρέπει αυτόματα τις ώρες σε ισοδύναμο κλάσμα ημέρας (με βάση 8ωρη εργάσιμη μέρα) για το υπόλοιπό σου.') }}</li>
+            </ul>
+            <p>{{ __('Και στις δύο περιπτώσεις, η ημερομηνία "Έως" ορίζεται αυτόματα ίδια με το "Από".') }}</p>
         </div>
     </x-filament::section>
 

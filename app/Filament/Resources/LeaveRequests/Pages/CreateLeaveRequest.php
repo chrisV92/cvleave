@@ -22,12 +22,15 @@ class CreateLeaveRequest extends CreateRecord
             $data['status'] = LeaveRequest::STATUS_PENDING;
         }
 
+        $data['end_date'] ??= $data['start_date'];
+
         return $data;
     }
 
     protected function beforeCreate(): void
     {
         $data = $this->form->getState();
+        $data['end_date'] ??= $data['start_date'];
 
         $user = User::find($data['user_id'] ?? auth()->id());
         $leaveType = LeaveType::find($data['leave_type_id']);

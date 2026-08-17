@@ -51,8 +51,11 @@
     "Κατάσταση": "Status",
     "Λήγει η άδεια του/της :name": ":name's leave is ending",
     "Μέρες": "Days",
+    "Μέρες (ισοδύναμο)": "Days (equivalent)",
     "Μέρες άδειας/έτος": "Leave days/year",
     "Μέρες/έτος": "Days/year",
+    "Μισή Μέρα": "Half Day",
+    "Μισή μέρα": "Half day",
     "Νέα αίτηση άδειας": "New leave request",
     "Νέα αίτηση άδειας: :name": "New leave request: :name",
     "Νέο password (προαιρετικό)": "New password (optional)",
@@ -200,5 +203,14 @@
     "Στην κορυφή της λίστας \"Αιτήσεις Άδειας\" έχεις:": "At the top of the \"Leave Requests\" list you have:",
     "όλες οι αιτήσεις όλων των υπαλλήλων σε ένα PDF, ταξινομημένες ανά υπάλληλο.": "every request from every employee in one PDF, sorted by employee.",
     "κατεβάζει τη (φιλτραρισμένη) λίστα αιτήσεων σε αρχείο .xlsx. Μπορείς να επιλέξεις συγκεκριμένες γραμμές πριν την εξαγωγή, ή να πάρεις όλη τη λίστα.": "downloads the (filtered) request list as an .xlsx file. You can select specific rows before exporting, or take the whole list.",
-    "Επιπλέον, από το μενού \"Χρήστες\", κάθε γραμμή έχει το δικό της κουμπί \"Αναφορά PDF\" — μια αναλυτική αναφορά (υπόλοιπο + ιστορικό) για έναν συγκεκριμένο υπάλληλο, χρήσιμη π.χ. για αξιολόγηση ή αρχειοθέτηση.": "Additionally, from the \"Users\" menu, each row has its own \"PDF Report\" button — a detailed report (balance + history) for a specific employee, useful e.g. for reviews or record-keeping."
+    "Επιπλέον, από το μενού \"Χρήστες\", κάθε γραμμή έχει το δικό της κουμπί \"Αναφορά PDF\" — μια αναλυτική αναφορά (υπόλοιπο + ιστορικό) για έναν συγκεκριμένο υπάλληλο, χρήσιμη π.χ. για αξιολόγηση ή αρχειοθέτηση.": "Additionally, from the \"Users\" menu, each row has its own \"PDF Report\" button — a detailed report (balance + history) for a specific employee, useful e.g. for reviews or record-keeping.",
+    "Τύπος Διάρκειας": "Duration Type",
+    "Ολόκληρη Μέρα": "Full Day",
+    "Ώρες": "Hours",
+    ":hours ώρες": ":hours hours",
+    "Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)": "How to submit a partial-day leave (half day or hours)",
+    "Στο πεδίο \"Τύπος Διάρκειας\" μπορείς να επιλέξεις εκτός από \"Ολόκληρη Μέρα\":": "In the \"Duration Type\" field, besides \"Full Day\" you can choose:",
+    "\"Μισή Μέρα\" — η άδεια αφορά μία μόνο ημερομηνία και μετράει 0.5 μέρα από το υπόλοιπό σου.": "\"Half Day\" — the leave covers a single date and counts as 0.5 day from your balance.",
+    "\"Ώρες\" — επιλέγεις πόσες ώρες (έως 7.5) θα λείψεις μέσα σε μία ημερομηνία. Το σύστημα μετατρέπει αυτόματα τις ώρες σε ισοδύναμο κλάσμα ημέρας (με βάση 8ωρη εργάσιμη μέρα) για το υπόλοιπό σου.": "\"Hours\" — you choose how many hours (up to 7.5) you'll be away on a single date. The system automatically converts the hours into an equivalent day fraction (based on an 8-hour work day) for your balance.",
+    "Και στις δύο περιπτώσεις, η ημερομηνία \"Έως\" ορίζεται αυτόματα ίδια με το \"Από\".": "In both cases, the \"To\" date is automatically set the same as the \"From\" date."
 }

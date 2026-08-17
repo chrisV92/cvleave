@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'dashboard',
-        ids: ['dashboard', 'approve-reject', 'manage-users', 'leave-types', 'balance-override', 'reminders'],
+        ids: ['dashboard', 'approve-reject', 'manage-users', 'leave-types', 'export-report', 'balance-override', 'reminders'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -42,8 +42,9 @@
                 <li><a href="#approve-reject" :class="active === 'approve-reject' && 'kb-toc-active'">2. {{ __('Έγκριση / Απόρριψη Αιτήσεων') }}</a></li>
                 <li><a href="#manage-users" :class="active === 'manage-users' && 'kb-toc-active'">3. {{ __('Διαχείριση Χρηστών') }}</a></li>
                 <li><a href="#leave-types" :class="active === 'leave-types' && 'kb-toc-active'">4. {{ __('Τύποι Αδειών & Υπολογισμός Δικαιώματος') }}</a></li>
-                <li><a href="#balance-override" :class="active === 'balance-override' && 'kb-toc-active'">5. {{ __('Χειροκίνητη Ρύθμιση Υπολοίπου (Override)') }}</a></li>
-                <li><a href="#reminders" :class="active === 'reminders' && 'kb-toc-active'">6. {{ __('Αυτόματες Υπενθυμίσεις') }}</a></li>
+                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">5. {{ __('Εξαγωγή & Αναφορές PDF') }}</a></li>
+                <li><a href="#balance-override" :class="active === 'balance-override' && 'kb-toc-active'">6. {{ __('Χειροκίνητη Ρύθμιση Υπολοίπου (Override)') }}</a></li>
+                <li><a href="#reminders" :class="active === 'reminders' && 'kb-toc-active'">7. {{ __('Αυτόματες Υπενθυμίσεις') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -93,6 +94,19 @@
             </ul>
             <img src="{{ asset('img/kb/10-admin-leave-type-edit.png') }}" class="kb-shot" alt="Leave type edit form with Greek law toggle">
             <p>{{ __('Το πεδίο "Απαιτεί σημείωση/αιτιολογία" κάνει υποχρεωτικό το πεδίο σημείωσης όταν κάποιος υποβάλλει αυτόν τον τύπο άδειας (π.χ. λόγος αναρρωτικής).') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="export-report" heading="{{ __('Εξαγωγή & Αναφορές PDF') }}" icon="heroicon-o-document-arrow-down">
+        <div class="kb-section">
+            <p>{{ __('Στην κορυφή της λίστας "Αιτήσεις Άδειας" έχεις:') }}</p>
+            <ul>
+                <li><strong>{{ __('Αναφορά Όλων (PDF)') }}</strong> — {{ __('όλες οι αιτήσεις όλων των υπαλλήλων σε ένα PDF, ταξινομημένες ανά υπάλληλο.') }}</li>
+                <li><strong>{{ __('Εξαγωγή Excel') }}</strong> — {{ __('κατεβάζει τη (φιλτραρισμένη) λίστα αιτήσεων σε αρχείο .xlsx. Μπορείς να επιλέξεις συγκεκριμένες γραμμές πριν την εξαγωγή, ή να πάρεις όλη τη λίστα.') }}</li>
+            </ul>
+            <img src="{{ asset('img/kb/14-admin-export-buttons.png') }}" class="kb-shot" alt="Export buttons on admin leave requests list">
+            <p>{{ __('Επιπλέον, από το μενού "Χρήστες", κάθε γραμμή έχει το δικό της κουμπί "Αναφορά PDF" — μια αναλυτική αναφορά (υπόλοιπο + ιστορικό) για έναν συγκεκριμένο υπάλληλο, χρήσιμη π.χ. για αξιολόγηση ή αρχειοθέτηση.') }}</p>
+            <img src="{{ asset('img/kb/15-admin-users-pdf-button.png') }}" class="kb-shot" alt="Per-employee PDF report button on Users list">
         </div>
     </x-filament::section>
 

@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'dashboard',
-        ids: ['dashboard', 'submit-request', 'your-requests', 'notifications', 'language-account'],
+        ids: ['dashboard', 'submit-request', 'your-requests', 'export-report', 'notifications', 'language-account'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -41,8 +41,9 @@
                 <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">1. {{ __('Ο Πίνακας Ελέγχου σου') }}</a></li>
                 <li><a href="#submit-request" :class="active === 'submit-request' && 'kb-toc-active'">2. {{ __('Πώς να υποβάλεις αίτηση άδειας') }}</a></li>
                 <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">3. {{ __('Οι Αιτήσεις σου') }}</a></li>
-                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">4. {{ __('Ειδοποιήσεις') }}</a></li>
-                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">5. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
+                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">4. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
+                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">5. {{ __('Ειδοποιήσεις') }}</a></li>
+                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">6. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -81,6 +82,17 @@
                 <li>🔴 <strong>{{ __('Απορρίφθηκε') }}</strong> — {{ __('θα δεις και την αιτία απόρριψης που έγραψε ο διαχειριστής.') }}</li>
             </ul>
             <img src="{{ asset('img/kb/02-employee-leave-requests.png') }}" class="kb-shot" alt="Employee leave requests list">
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="export-report" heading="{{ __('Εξαγωγή & Αναφορά PDF') }}" icon="heroicon-o-document-arrow-down">
+        <div class="kb-section">
+            <p>{{ __('Στην κορυφή της λίστας "Αιτήσεις Άδειας" έχεις δύο επιλογές για να πάρεις τα δεδομένα σου έξω από την εφαρμογή:') }}</p>
+            <ul>
+                <li><strong>{{ __('Η Αναφορά μου (PDF)') }}</strong> — {{ __('κατεβάζει ένα αρχείο PDF με το υπόλοιπο ημερών σου ανά τύπο άδειας και όλο το ιστορικό των αιτήσεών σου, έτοιμο για εκτύπωση ή αποστολή.') }}</li>
+                <li><strong>{{ __('Εξαγωγή Excel') }}</strong> — {{ __('κατεβάζει τις δικές σου αιτήσεις σε αρχείο .xlsx, ανοίγει σε Excel/Google Sheets.') }}</li>
+            </ul>
+            <img src="{{ asset('img/kb/13-employee-export-buttons.png') }}" class="kb-shot" alt="Export buttons on employee leave requests list">
         </div>
     </x-filament::section>
 

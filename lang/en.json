@@ -191,5 +191,14 @@
     "Υπόλοιπο Ημερών": "Day Balance",
     "αιτήσεις": "requests",
     "Αναφορά Αδειών — Όλοι οι Υπάλληλοι": "Leave Report — All Employees",
-    "Αναφορά Όλων (PDF)": "Report for All (PDF)"
+    "Αναφορά Όλων (PDF)": "Report for All (PDF)",
+    "Εξαγωγή & Αναφορά PDF": "Export & PDF Report",
+    "Εξαγωγή & Αναφορές PDF": "Export & PDF Reports",
+    "Στην κορυφή της λίστας \"Αιτήσεις Άδειας\" έχεις δύο επιλογές για να πάρεις τα δεδομένα σου έξω από την εφαρμογή:": "At the top of the \"Leave Requests\" list you have two options to get your data out of the app:",
+    "κατεβάζει ένα αρχείο PDF με το υπόλοιπο ημερών σου ανά τύπο άδειας και όλο το ιστορικό των αιτήσεών σου, έτοιμο για εκτύπωση ή αποστολή.": "downloads a PDF file with your day balance per leave type and your full request history, ready to print or send.",
+    "κατεβάζει τις δικές σου αιτήσεις σε αρχείο .xlsx, ανοίγει σε Excel/Google Sheets.": "downloads your own requests as an .xlsx file, opens in Excel/Google Sheets.",
+    "Στην κορυφή της λίστας \"Αιτήσεις Άδειας\" έχεις:": "At the top of the \"Leave Requests\" list you have:",
+    "όλες οι αιτήσεις όλων των υπαλλήλων σε ένα PDF, ταξινομημένες ανά υπάλληλο.": "every request from every employee in one PDF, sorted by employee.",
+    "κατεβάζει τη (φιλτραρισμένη) λίστα αιτήσεων σε αρχείο .xlsx. Μπορείς να επιλέξεις συγκεκριμένες γραμμές πριν την εξαγωγή, ή να πάρεις όλη τη λίστα.": "downloads the (filtered) request list as an .xlsx file. You can select specific rows before exporting, or take the whole list.",
+    "Επιπλέον, από το μενού \"Χρήστες\", κάθε γραμμή έχει το δικό της κουμπί \"Αναφορά PDF\" — μια αναλυτική αναφορά (υπόλοιπο + ιστορικό) για έναν συγκεκριμένο υπάλληλο, χρήσιμη π.χ. για αξιολόγηση ή αρχειοθέτηση.": "Additionally, from the \"Users\" menu, each row has its own \"PDF Report\" button — a detailed report (balance + history) for a specific employee, useful e.g. for reviews or record-keeping."
 }

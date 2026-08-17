@@ -27,17 +27,35 @@ class LeaveRequestSubmitted extends Notification implements ShouldQueue
     {
         $lr = $this->leaveRequest;
 
+        $details = [
+            __('Υπάλληλος') => $lr->user->name,
+            __('Τύπος άδειας') => $lr->leaveType->name,
+            __('Ημερομηνίες') => "{$lr->start_date->format('d/m/Y')} – {$lr->end_date->format('d/m/Y')}",
+            __('Μέρες') => __(':days εργάσιμες μέρες', ['days' => $lr->days_count]),
+        ];
+
+        if ($lr->note) {
+            $details[__('Σημείωση')] = $lr->note;
+        }
+
         return (new MailMessage)
             ->subject(__('Νέα αίτηση άδειας: :name', ['name' => $lr->user->name]))
-            ->greeting(__('Νέα αίτηση άδειας'))
-            ->line(__('Ο/Η :name υπέβαλε αίτηση για :type.', ['name' => $lr->user->name, 'type' => $lr->leaveType->name]))
-            ->line(__('Από :start έως :end (:days μέρες).', [
-                'start' => $lr->start_date->format('d/m/Y'),
-                'end' => $lr->end_date->format('d/m/Y'),
-                'days' => $lr->days_count,
-            ]))
-            ->when($lr->note, fn ($mail) => $mail->line(__('Σημείωση: :note', ['note' => $lr->note])))
-            ->action(__('Δες την αίτηση'), url('/admin/leave-requests?tableFilters[status][value]=pending'));
+            ->view('emails.leave-notification', [
+                'title' => __('Νέα αίτηση άδειας'),
+                'accent' => '#d97706',
+                'accentDark' => '#92400e',
+                'badgeBg' => '#fef3c7',
+                'badgeText' => '#92400e',
+                'badgeLabel' => __('Νέα Αίτηση'),
+                'heading' => __('Νέα αίτηση άδειας 📝'),
+                'intro' => __('Ο/Η <strong>:name</strong> υπέβαλε αίτηση για <strong>:type</strong>.', [
+                    'name' => $lr->user->name,
+                    'type' => $lr->leaveType->name,
+                ]),
+                'details' => $details,
+                'ctaLabel' => __('Δες την αίτηση'),
+                'ctaUrl' => url('/admin/leave-requests?tableFilters[status][value]=pending'),
+            ]);
     }
 
     public function toDatabase(object $notifiable): array

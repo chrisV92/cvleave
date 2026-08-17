@@ -26,23 +26,47 @@ class LeaveEndingSoon extends Notification implements ShouldQueue
     {
         $lr = $this->leaveRequest;
 
+        $details = [
+            __('Τύπος άδειας') => $lr->leaveType->name,
+            __('Ξεκίνησε') => $lr->start_date->format('d/m/Y'),
+            __('Λήγει') => $lr->end_date->format('d/m/Y'),
+        ];
+
         if ($this->forAdmin) {
+            $details = [__('Υπάλληλος') => $lr->user->name] + $details;
+
             return (new MailMessage)
                 ->subject(__('Λήγει η άδεια του/της :name', ['name' => $lr->user->name]))
-                ->line(__('Η άδεια του/της :name (:type) λήγει στις :date.', [
-                    'name' => $lr->user->name,
-                    'type' => $lr->leaveType->name,
-                    'date' => $lr->end_date->format('d/m/Y'),
-                ]));
+                ->view('emails.leave-notification', [
+                    'title' => __('Λήγει η άδεια του/της :name', ['name' => $lr->user->name]),
+                    'accent' => '#0ea5e9',
+                    'accentDark' => '#0369a1',
+                    'badgeBg' => '#e0f2fe',
+                    'badgeText' => '#0369a1',
+                    'badgeLabel' => __('Υπενθύμιση'),
+                    'heading' => __('Υπενθύμιση άδειας 📅'),
+                    'intro' => __('Η άδεια του/της <strong>:name</strong> λήγει αύριο.', ['name' => $lr->user->name]),
+                    'details' => $details,
+                    'ctaLabel' => __('Δες το ημερολόγιο'),
+                    'ctaUrl' => url('/admin'),
+                ]);
         }
 
         return (new MailMessage)
             ->subject(__('Η άδειά σου λήγει σύντομα'))
-            ->greeting(__('Υπενθύμιση άδειας'))
-            ->line(__('Η άδειά σου (:type) λήγει στις :date. Επιστροφή στην εργασία μετά από αυτή την ημερομηνία.', [
-                'type' => $lr->leaveType->name,
-                'date' => $lr->end_date->format('d/m/Y'),
-            ]));
+            ->view('emails.leave-notification', [
+                'title' => __('Η άδειά σου λήγει σύντομα'),
+                'accent' => '#0ea5e9',
+                'accentDark' => '#0369a1',
+                'badgeBg' => '#e0f2fe',
+                'badgeText' => '#0369a1',
+                'badgeLabel' => __('Υπενθύμιση'),
+                'heading' => __('Υπενθύμιση άδειας 📅'),
+                'intro' => __('Η άδειά σου λήγει <strong>αύριο</strong> — τα λέμε πίσω στη δουλειά!'),
+                'details' => $details,
+                'ctaLabel' => __('Δες το ημερολόγιο'),
+                'ctaUrl' => url('/admin'),
+            ]);
     }
 
     public function toDatabase(object $notifiable): array

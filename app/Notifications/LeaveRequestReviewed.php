@@ -31,23 +31,36 @@ class LeaveRequestReviewed extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $lr = $this->leaveRequest;
-        $verb = $this->isApproved() ? __('εγκρίθηκε') : __('απορρίφθηκε');
+        $approved = $this->isApproved();
+        $verb = $approved ? __('εγκρίθηκε') : __('απορρίφθηκε');
 
-        $mail = (new MailMessage)
-            ->subject(__('Η αίτηση άδειάς σου :verb', ['verb' => $verb]))
-            ->greeting($this->isApproved() ? __('Η αίτηση άδειάς σου εγκρίθηκε ✅') : __('Η αίτηση άδειάς σου απορρίφθηκε'))
-            ->line(__(':type: :start - :end (:days μέρες).', [
-                'type' => $lr->leaveType->name,
-                'start' => $lr->start_date->format('d/m/Y'),
-                'end' => $lr->end_date->format('d/m/Y'),
-                'days' => $lr->days_count,
-            ]));
+        $details = [
+            __('Τύπος άδειας') => $lr->leaveType->name,
+            __('Ημερομηνίες') => "{$lr->start_date->format('d/m/Y')} – {$lr->end_date->format('d/m/Y')}",
+            __('Μέρες') => __(':days εργάσιμες μέρες', ['days' => $lr->days_count]),
+        ];
 
-        if (! $this->isApproved() && $lr->rejection_reason) {
-            $mail->line(__('Αιτία: :reason', ['reason' => $lr->rejection_reason]));
+        if (! $approved && $lr->rejection_reason) {
+            $details[__('Αιτία απόρριψης')] = $lr->rejection_reason;
         }
 
-        return $mail->action(__('Δες την αίτηση'), url('/admin/leave-requests'));
+        return (new MailMessage)
+            ->subject(__('Η αίτηση άδειάς σου :verb', ['verb' => $verb]))
+            ->view('emails.leave-notification', [
+                'title' => __('Η αίτηση άδειάς σου :verb', ['verb' => $verb]),
+                'accent' => $approved ? '#16a34a' : '#dc2626',
+                'accentDark' => $approved ? '#166534' : '#991b1b',
+                'badgeBg' => $approved ? '#dcfce7' : '#fee2e2',
+                'badgeText' => $approved ? '#166534' : '#991b1b',
+                'badgeLabel' => $approved ? __('Εγκρίθηκε') : __('Απορρίφθηκε'),
+                'heading' => $approved ? __('Η αίτηση άδειάς σου εγκρίθηκε ✅') : __('Η αίτηση άδειάς σου απορρίφθηκε'),
+                'intro' => $approved
+                    ? __('Καλά νέα! Η αίτηση άδειάς σου εγκρίθηκε από τον διαχειριστή.')
+                    : __('Δυστυχώς η αίτηση άδειάς σου απορρίφθηκε — δες την αιτία παρακάτω.'),
+                'details' => $details,
+                'ctaLabel' => __('Δες την αίτηση'),
+                'ctaUrl' => url('/admin/leave-requests'),
+            ]);
     }
 
     public function toDatabase(object $notifiable): array

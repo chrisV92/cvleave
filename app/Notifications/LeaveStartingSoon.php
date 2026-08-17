@@ -26,24 +26,47 @@ class LeaveStartingSoon extends Notification implements ShouldQueue
     {
         $lr = $this->leaveRequest;
 
+        $details = [
+            __('Τύπος άδειας') => $lr->leaveType->name,
+            __('Ξεκινάει') => $lr->start_date->format('d/m/Y'),
+            __('Λήγει') => $lr->end_date->format('d/m/Y'),
+        ];
+
         if ($this->forAdmin) {
+            $details = [__('Υπάλληλος') => $lr->user->name] + $details;
+
             return (new MailMessage)
                 ->subject(__('Ξεκινάει η άδεια του/της :name', ['name' => $lr->user->name]))
-                ->line(__('Η άδεια του/της :name (:type) ξεκινάει στις :date.', [
-                    'name' => $lr->user->name,
-                    'type' => $lr->leaveType->name,
-                    'date' => $lr->start_date->format('d/m/Y'),
-                ]));
+                ->view('emails.leave-notification', [
+                    'title' => __('Ξεκινάει η άδεια του/της :name', ['name' => $lr->user->name]),
+                    'accent' => '#d97706',
+                    'accentDark' => '#92400e',
+                    'badgeBg' => '#fef3c7',
+                    'badgeText' => '#92400e',
+                    'badgeLabel' => __('Υπενθύμιση'),
+                    'heading' => __('Υπενθύμιση άδειας 📅'),
+                    'intro' => __('Η άδεια του/της <strong>:name</strong> ξεκινάει αύριο.', ['name' => $lr->user->name]),
+                    'details' => $details,
+                    'ctaLabel' => __('Δες το ημερολόγιο'),
+                    'ctaUrl' => url('/admin'),
+                ]);
         }
 
         return (new MailMessage)
             ->subject(__('Η άδειά σου ξεκινάει σύντομα'))
-            ->greeting(__('Υπενθύμιση άδειας'))
-            ->line(__('Η άδειά σου (:type) ξεκινάει στις :start και λήγει στις :end.', [
-                'type' => $lr->leaveType->name,
-                'start' => $lr->start_date->format('d/m/Y'),
-                'end' => $lr->end_date->format('d/m/Y'),
-            ]));
+            ->view('emails.leave-notification', [
+                'title' => __('Η άδειά σου ξεκινάει σύντομα'),
+                'accent' => '#d97706',
+                'accentDark' => '#92400e',
+                'badgeBg' => '#fef3c7',
+                'badgeText' => '#92400e',
+                'badgeLabel' => __('Υπενθύμιση'),
+                'heading' => __('Υπενθύμιση άδειας 📅'),
+                'intro' => __('Η άδειά σου ξεκινάει <strong>αύριο</strong> — καλά ξεκούραστα!'),
+                'details' => $details,
+                'ctaLabel' => __('Δες το ημερολόγιο'),
+                'ctaUrl' => url('/admin'),
+            ]);
     }
 
     public function toDatabase(object $notifiable): array

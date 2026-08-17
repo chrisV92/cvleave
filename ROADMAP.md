@@ -42,7 +42,6 @@ price/simplicity for the Greek market specifically, not on feature breadth.
 - **Half-day leave UI** — `leave_requests.days_count` is already `decimal(5,1)`
   to support this, but the create/edit form only ever computes whole business
   days. No UI exposes a half-day option yet.
-- **Export / reporting** — no PDF/Excel/CSV export of leave data exists.
 - **CI/CD** — tests (`php artisan test`) are run manually; no automated
   pipeline runs them on push/PR yet.
 - **Knowledge Base maintenance** — the in-panel Knowledge Base pages

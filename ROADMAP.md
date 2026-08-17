@@ -35,6 +35,21 @@ price/simplicity for the Greek market specifically, not on feature breadth.
 - **Production hosting** — this currently runs on a home server over
   Tailscale; a public product needs real infrastructure, backups, uptime.
 
+## Near-term feature backlog (not SaaS-related, just "not built yet")
+
+- **Real SMTP provider** — Mailpit is dev-only; production needs a real
+  transactional mail provider configured in `.env`.
+- **Half-day leave UI** — `leave_requests.days_count` is already `decimal(5,1)`
+  to support this, but the create/edit form only ever computes whole business
+  days. No UI exposes a half-day option yet.
+- **Export / reporting** — no PDF/Excel/CSV export of leave data exists.
+- **CI/CD** — tests (`php artisan test`) are run manually; no automated
+  pipeline runs them on push/PR yet.
+- **Knowledge Base maintenance** — the in-panel Knowledge Base pages
+  (Employee/Admin guides) must be kept in sync by hand whenever a feature
+  changes — there's no automated check for staleness.
+
 ## Status
 
-Parked. Revisit if/when there's appetite to productize.
+Core app: done and in active internal use. SaaS productization: parked,
+revisit if/when there's appetite. Backlog above: pick up opportunistically.

@@ -23,6 +23,11 @@ class LeaveBalancesRelationManager extends RelationManager
         return __('Χειροκίνητες Ρυθμίσεις Υπολοίπου');
     }
 
+    protected static function getModelLabel(): ?string
+    {
+        return __('ρύθμιση υπολοίπου');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -71,7 +76,8 @@ class LeaveBalancesRelationManager extends RelationManager
             ])
             ->defaultSort('year', 'desc')
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->label(__('Προσθήκη Ρύθμισης')),
             ])
             ->recordActions([
                 EditAction::make(),

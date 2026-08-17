@@ -23,6 +23,7 @@ class UserForm
                     ->required()
                     ->unique(ignoreRecord: true),
                 Select::make('role')
+                    ->label(__('Ρόλος'))
                     ->options([
                         'admin' => __('Admin'),
                         'employee' => __('Υπάλληλος'),

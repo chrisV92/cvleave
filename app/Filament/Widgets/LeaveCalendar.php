@@ -62,6 +62,8 @@ class LeaveCalendar extends FullCalendarWidget
 
     public function config(): array
     {
+        $isGreek = app()->getLocale() === 'el';
+
         return [
             'headerToolbar' => [
                 'left' => 'prev,next today',
@@ -69,6 +71,20 @@ class LeaveCalendar extends FullCalendarWidget
                 'right' => 'dayGridMonth,dayGridWeek',
             ],
             'firstDay' => 1,
+            'locale' => $isGreek ? 'el' : 'en',
+            'buttonText' => $isGreek ? [
+                'today' => 'Σήμερα',
+                'month' => 'Μήνας',
+                'week' => 'Εβδομάδα',
+                'day' => 'Ημέρα',
+                'list' => 'Λίστα',
+            ] : [
+                'today' => 'Today',
+                'month' => 'Month',
+                'week' => 'Week',
+                'day' => 'Day',
+                'list' => 'List',
+            ],
         ];
     }
 }

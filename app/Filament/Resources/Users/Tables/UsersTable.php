@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -42,6 +44,12 @@ class UsersTable
                 //
             ])
             ->recordActions([
+                Action::make('pdfReport')
+                    ->label(__('Αναφορά PDF'))
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->url(fn (User $record) => route('reports.employee-leave', $record))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([

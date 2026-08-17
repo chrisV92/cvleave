@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\LeaveRequests\Tables;
 
+use App\Filament\Exports\LeaveRequestExporter;
 use App\Filament\Resources\LeaveRequests\LeaveRequestResource;
 use App\Models\LeaveRequest;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportBulkAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BadgeColumn;
@@ -109,6 +111,9 @@ class LeaveRequestsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    ExportBulkAction::make()
+                        ->label(__('Εξαγωγή Excel'))
+                        ->exporter(LeaveRequestExporter::class),
                     DeleteBulkAction::make(),
                 ]),
             ]);

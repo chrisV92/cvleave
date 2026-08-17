@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LeaveReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,3 +14,11 @@ Route::get('/locale/{locale}', function (string $locale) {
 
     return back();
 })->name('locale.switch');
+
+Route::get('/reports/employee/{user}', [LeaveReportController::class, 'employee'])
+    ->middleware('auth')
+    ->name('reports.employee-leave');
+
+Route::get('/reports/all-employees', [LeaveReportController::class, 'allEmployees'])
+    ->middleware('auth')
+    ->name('reports.all-employees-leave');

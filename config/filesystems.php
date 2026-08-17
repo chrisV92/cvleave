@@ -36,6 +36,20 @@ return [
             'serve' => true,
             'throw' => false,
             'report' => false,
+            // Files here are written by both php-fpm (www-data) and the queue
+            // worker (cvarkas, group www-data) — group-readable permissions
+            // ensure whichever process serves a download can always read it,
+            // regardless of which process created the file.
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0640,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0750,
+                ],
+            ],
         ],
 
         'public' => [
@@ -45,6 +59,16 @@ return [
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0640,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0750,
+                ],
+            ],
         ],
 
         's3' => [

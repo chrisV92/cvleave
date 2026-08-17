@@ -1,0 +1,61 @@
+<?php
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+/*
+|--------------------------------------------------------------------------
+| Test Case
+|--------------------------------------------------------------------------
+|
+| The closure you provide to your test functions is always bound to a specific PHPUnit test
+| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
+| need to change it using the "pest()" function to bind different classes or traits.
+|
+*/
+
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Feature');
+
+pest()->extend(TestCase::class)
+    ->in('Unit');
+
+/*
+|--------------------------------------------------------------------------
+| Expectations
+|--------------------------------------------------------------------------
+|
+| When you're writing tests, you often need to check that values meet certain conditions. The
+| "expect()" function gives you access to a set of "expectations" methods that you can use
+| to assert different things. Of course, you may extend the Expectation API at any time.
+|
+*/
+
+expect()->extend('toBeOne', function () {
+    return $this->toBe(1);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Functions
+|--------------------------------------------------------------------------
+|
+| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
+| project that you don't want to repeat in every file. Here you can also expose helpers as
+| global functions to help you to reduce the number of lines of code in your test files.
+|
+*/
+
+/**
+ * A non-persisted User instance for pure-computation unit tests
+ * (e.g. the Greek annual leave formula) that don't need the database.
+ */
+function unpersistedUser(?string $hireDate, float $priorYears = 0): \App\Models\User
+{
+    $user = new \App\Models\User();
+    $user->hire_date = $hireDate ? \Illuminate\Support\Carbon::parse($hireDate) : null;
+    $user->prior_experience_years = $priorYears;
+
+    return $user;
+}

@@ -114,5 +114,10 @@
     "Ο/Η <strong>:name</strong> υπέβαλε αίτηση για <strong>:type</strong>.": "<strong>:name</strong> submitted a request for <strong>:type</strong>.",
     "Σύστημα διαχείρισης αδειών προσωπικού": "Employee leave management system",
     "Τύπος άδειας": "Leave type",
-    "Υπενθύμιση": "Reminder"
+    "Υπενθύμιση": "Reminder",
+    "Αντικαθιστά εντελώς τον αυτόματο υπολογισμό για αυτόν τον χρήστη/τύπο/έτος.": "Completely overrides the automatic calculation for this user/type/year.",
+    "Έτος": "Year",
+    "Μέρες (override)": "Days (override)",
+    "Υπάρχει ήδη ρύθμιση για αυτόν τον τύπο άδειας/έτος.": "A setting already exists for this leave type/year.",
+    "Χειροκίνητες Ρυθμίσεις Υπολοίπου": "Manual Balance Overrides"
 }

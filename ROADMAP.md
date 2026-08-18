@@ -77,33 +77,43 @@ price/simplicity for the Greek market specifically, not on feature breadth.
      last year's unused days are silently lost, and there is no deadline
      after which they expire.
 
-  **⚠️ Confirm the legal rule first.** Whether the carry-over is automatic,
-  whether it truly expires 31 March, whether the employer is obliged to grant
-  it by then, and what happens to days never taken (payout, surcharge) all
-  change the design. This needs the same accountant/lawyer review as the
-  accrual formula above — building to a guessed rule would be worse than not
-  building it.
+  **Agreed direction: make the deadline a per-tenant setting.** Rather than
+  hardcoding "31 March" — which would bake a guessed legal rule into the
+  product — each company configures its own carry-over cutoff, and can turn
+  carry-over off entirely. Greek tenants set 31 March; anyone else sets what
+  their own law or policy says. This also removes the legal uncertainty as a
+  blocker: the app enforces whatever the customer configures rather than
+  asserting what the law is.
 
-  **Design options considered:**
-  - *A `charged_year` column on `leave_requests`* (recommended). Defaults to
-    `start_date`'s year; a Jan–Mar request may instead be charged to the
-    previous year while that balance lasts. `usedDays()` then sums on
-    `charged_year` rather than `whereYear('start_date')`. Small migration,
-    keeps the accounting explicit and auditable ("which year did this come
-    out of?"), makes the March deadline a validation rule on selectable
-    values rather than hidden arithmetic, and also fixes case 1 — a
-    boundary-spanning request is either charged to one year deliberately or
-    split into two rows.
-  - *Implicit carry-over inside the balance calculation.* No schema change,
-    but the consumption order (old balance first) becomes invisible, and
-    reporting "how many 2026 days are left" gets murky.
-  - *A dedicated `leave_carryovers` ledger* (user, leave type, from year,
-    days, expires at). Most correct and supports expiry cleanly, but needs a
-    year-end process and is the heaviest option.
+  **Shape of the change:**
+  - `tenants.carryover_deadline` (nullable, e.g. month+day) — null means no
+    carry-over for that company.
+  - `leave_types.allows_carryover` (boolean) — carry-over should apply to
+    annual leave, not to sick or unpaid leave, so the toggle belongs per leave
+    type as well as per tenant.
+  - `leave_requests.days_from_carryover` (decimal, default 0) — how much of
+    this request was drawn from the previous year's balance. Keeps one row per
+    request (see "split across two years" below) while making the accounting
+    explicit and auditable.
+  - `LeaveBalanceService` gains a carry-over aware balance: entitlement for
+    year N, minus days charged to N, where days charged to N include the
+    `days_from_carryover` portion of requests taken in year N+1 before the
+    cutoff. Nothing needs materialising at year end — it can all be computed,
+    so no cron job.
+  - Employee dashboard shows carried-over days as their own card, separate
+    from the current year, with the expiry date visible — e.g.
+    "5 / 22 από 2026 (λήγουν 31/03/2027)" next to "22 / 22 για 2027".
 
-  Whichever is chosen, the dashboard balance cards need to show carried-over
-  days and their expiry separately, otherwise employees cannot tell which
-  days they are about to lose.
+  **Two decisions still open:**
+  1. *Consumption order.* Old balance first is the obvious default, since
+     carried-over days expire — but it should be deliberate and stated in the
+     UI, otherwise employees will not understand which days a request ate.
+  2. *A request that straddles both buckets.* Someone with 3 carried-over days
+     requesting 5 days in February draws 3 from last year and 2 from this one.
+     That is why `days_from_carryover` sits on the request rather than a plain
+     `charged_year` column — one request can legitimately be charged to two
+     years, and splitting it into two rows would misrepresent what the
+     employee actually submitted.
 - **Onboarding flow** — self-serve company signup, not admin-provisioned users.
 - **Production hosting** — this currently runs on a home server over
   Tailscale; a public product needs real infrastructure, backups, uptime.

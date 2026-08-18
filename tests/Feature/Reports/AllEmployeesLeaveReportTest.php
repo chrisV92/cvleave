@@ -46,11 +46,15 @@ it('only includes leave requests from the admin\'s own tenant', function () {
         ->once()
         ->andReturnUsing(function ($view, $data) use (&$capturedData) {
             $capturedData = $data;
-            $mock = Mockery::mock();
-            $mock->shouldReceive('setPaper')->andReturnSelf();
-            $mock->shouldReceive('download')->andReturn(response('fake'));
 
-            return $mock;
+            // Mock the concrete PDF class so the facade's declared return type
+            // is satisfied — a bare Mockery double trips a TypeError that
+            // Laravel then logs on every run.
+            $pdf = Mockery::mock(Barryvdh\DomPDF\PDF::class);
+            $pdf->shouldReceive('setPaper')->andReturnSelf();
+            $pdf->shouldReceive('download')->andReturn(response('fake'));
+
+            return $pdf;
         });
 
     $this->actingAs($admin)->get(route('reports.all-employees-leave'));

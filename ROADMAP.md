@@ -64,6 +64,10 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   accountant/lawyer before being relied on for real payroll decisions, and
   edge cases (six-day work week, part-time, parental leave, etc.) aren't
   covered yet.
+- **Leave spanning a year boundary** — `LeaveBalanceService::usedDays()` buckets
+  a request by `start_date`'s year, so leave running e.g. 28 Dec – 5 Jan is
+  charged entirely to the starting year rather than split across both. Fine for
+  current use, but worth deciding deliberately before this is sold.
 - **Onboarding flow** — self-serve company signup, not admin-provisioned users.
 - **Production hosting** — this currently runs on a home server over
   Tailscale; a public product needs real infrastructure, backups, uptime.

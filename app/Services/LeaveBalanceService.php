@@ -101,19 +101,44 @@ class LeaveBalanceService
 
     /**
      * Days already used (approved requests) for a user/leave type in a given year.
+     *
+     * $excludeLeaveRequestId leaves one request out of the total — used when
+     * re-evaluating that request itself (e.g. approving it, or editing an
+     * already-approved one), so it isn't counted against its own allowance.
      */
-    public function usedDays(User $user, LeaveType $leaveType, int $year): float
+    public function usedDays(User $user, LeaveType $leaveType, int $year, ?int $excludeLeaveRequestId = null): float
     {
         return (float) $user->leaveRequests()
             ->where('leave_type_id', $leaveType->id)
             ->where('status', LeaveRequest::STATUS_APPROVED)
             ->whereYear('start_date', $year)
+            ->when($excludeLeaveRequestId, fn ($query) => $query->whereKeyNot($excludeLeaveRequestId))
             ->sum('days_count');
     }
 
-    public function remainingDays(User $user, LeaveType $leaveType, int $year): float
+    public function remainingDays(User $user, LeaveType $leaveType, int $year, ?int $excludeLeaveRequestId = null): float
     {
-        return $this->entitledDays($user, $leaveType, $year) - $this->usedDays($user, $leaveType, $year);
+        return $this->entitledDays($user, $leaveType, $year)
+            - $this->usedDays($user, $leaveType, $year, $excludeLeaveRequestId);
+    }
+
+    /**
+     * Whether approving this request would push the employee past their
+     * entitlement. Submitting a request only checks the balance against
+     * already-approved leave, so two requests that each fit on their own can
+     * still overdraw the balance once both are approved — this is the guard
+     * for that moment.
+     */
+    public function approvalWouldExceedBalance(LeaveRequest $leaveRequest): bool
+    {
+        $remaining = $this->remainingDays(
+            $leaveRequest->user,
+            $leaveRequest->leaveType,
+            Carbon::parse($leaveRequest->start_date)->year,
+            excludeLeaveRequestId: $leaveRequest->getKey(),
+        );
+
+        return (float) $leaveRequest->days_count > $remaining;
     }
 
     /**

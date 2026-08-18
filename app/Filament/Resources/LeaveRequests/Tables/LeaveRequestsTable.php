@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LeaveRequests\Tables;
 use App\Filament\Exports\LeaveRequestExporter;
 use App\Filament\Resources\LeaveRequests\LeaveRequestResource;
 use App\Models\LeaveRequest;
+use App\Services\LeaveBalanceService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -96,6 +97,26 @@ class LeaveRequestsTable
                     ->visible(fn (LeaveRequest $record) => $isAdmin && $record->status === LeaveRequest::STATUS_PENDING)
                     ->requiresConfirmation()
                     ->action(function (LeaveRequest $record) {
+                        $service = app(LeaveBalanceService::class);
+
+                        if ($service->approvalWouldExceedBalance($record)) {
+                            $year = $record->start_date->year;
+
+                            Notification::make()
+                                ->title(__('Ανεπαρκές υπόλοιπο ημερών'))
+                                ->body(__('Η έγκριση θα ξεπερνούσε το υπόλοιπο του/της :name για :type το :year (διαθέσιμες: :remaining, ζητούνται: :requested). Αύξησε το δικαίωμά του/της από τις "Χειροκίνητες Ρυθμίσεις Υπολοίπου" αν θέλεις να προχωρήσεις.', [
+                                    'name' => $record->user->name,
+                                    'type' => $record->leaveType->name,
+                                    'year' => $year,
+                                    'remaining' => $service->remainingDays($record->user, $record->leaveType, $year, excludeLeaveRequestId: $record->getKey()),
+                                    'requested' => $record->days_count,
+                                ]))
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
                         $record->update(['status' => LeaveRequest::STATUS_APPROVED]);
                         Notification::make()->title(__('Η αίτηση εγκρίθηκε'))->success()->send();
                     }),

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LeaveRequests\Pages;
 use App\Filament\Resources\LeaveRequests\LeaveRequestResource;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\User;
 use App\Services\LeaveBalanceService;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -36,16 +37,21 @@ class EditLeaveRequest extends EditRecord
 
     protected function beforeSave(): void
     {
+        $data = $this->form->getState();
+        // Half-day/hours requests hide the end_date field, so it can be absent
+        // from the form state entirely — mirror the create page's fallback.
+        $data['end_date'] ??= $data['start_date'];
+
+        $service = app(LeaveBalanceService::class);
+
         if (auth()->user()?->isAdmin() ?? false) {
+            $this->guardAdminApproval($data, $service);
+
             return;
         }
 
-        $data = $this->form->getState();
-
         $leaveType = LeaveType::find($data['leave_type_id']);
         $year = Carbon::parse($data['start_date'])->year;
-
-        $service = app(LeaveBalanceService::class);
 
         if ($service->hasOverlap($this->record->user, $data['start_date'], $data['end_date'], excludeLeaveRequestId: $this->record->id)) {
             Notification::make()
@@ -68,6 +74,41 @@ class EditLeaveRequest extends EditRecord
                     'remaining' => $remaining,
                     'type' => $leaveType->name,
                     'year' => $year,
+                ]))
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+    }
+
+    /**
+     * Submitting a request only ever checks the balance against already-approved
+     * leave, so several pending requests can each fit on their own and still
+     * overdraw the balance once an admin approves them. This is the guard for
+     * that moment — and for an admin editing an already-approved request upward.
+     */
+    protected function guardAdminApproval(array $data, LeaveBalanceService $service): void
+    {
+        if (($data['status'] ?? null) !== LeaveRequest::STATUS_APPROVED) {
+            return;
+        }
+
+        $user = User::find($data['user_id'] ?? $this->record->user_id);
+        $leaveType = LeaveType::find($data['leave_type_id']);
+        $year = Carbon::parse($data['start_date'])->year;
+
+        $remaining = $service->remainingDays($user, $leaveType, $year, excludeLeaveRequestId: $this->record->getKey());
+
+        if ((float) $data['days_count'] > $remaining) {
+            Notification::make()
+                ->title(__('Ανεπαρκές υπόλοιπο ημερών'))
+                ->body(__('Ο/Η :name έχει μόνο :remaining διαθέσιμες μέρες για :type το :year, ζητήθηκαν :requested.', [
+                    'name' => $user->name,
+                    'remaining' => $remaining,
+                    'type' => $leaveType->name,
+                    'year' => $year,
+                    'requested' => $data['days_count'],
                 ]))
                 ->danger()
                 ->send();

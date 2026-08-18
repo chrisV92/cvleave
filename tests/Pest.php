@@ -74,6 +74,11 @@ function actingInTenant(User $user): User
 {
     test()->actingAs($user);
 
+    // Setting the current panel matters: Filament's tenancy global scope is a
+    // no-op unless the panel it was registered for is the current one, so
+    // without this the tests would silently see across tenants where a real
+    // request would not.
+    Filament::setCurrentPanel(Filament::getPanel('admin'));
     Filament::setTenant($user->tenant, isQuiet: true);
     app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
 

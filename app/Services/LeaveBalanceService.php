@@ -30,6 +30,10 @@ class LeaveBalanceService
             return (float) $override;
         }
 
+        if ($this->wasNotEmployedIn($user, $year)) {
+            return 0;
+        }
+
         if ($leaveType->auto_calculate && $leaveType->use_greek_law_formula) {
             return $this->greekLawEntitledDays($user, now()->setYear($year)->endOfYear());
         }
@@ -143,13 +147,23 @@ class LeaveBalanceService
         }
 
         $asOf = Carbon::parse($asOf);
-        $deadline = $user->tenant?->carryoverDeadlineFor($asOf->year);
+        $tenant = $user->tenant;
+        $deadline = $tenant?->carryoverDeadlineFor($asOf->year);
 
         if (! $deadline || $asOf->greaterThan($deadline)) {
             return 0;
         }
 
-        return max(0, $this->remainingDays($user, $leaveType, $asOf->year - 1, $excludeLeaveRequestId));
+        $sourceYear = $asOf->year - 1;
+
+        // Nothing carries over from before the company had complete records —
+        // otherwise adopting the app would credit everyone with a year that was
+        // never actually tracked.
+        if ($tenant->carryover_from_year !== null && $sourceYear < $tenant->carryover_from_year) {
+            return 0;
+        }
+
+        return max(0, $this->remainingDays($user, $leaveType, $sourceYear, $excludeLeaveRequestId));
     }
 
     /**
@@ -192,6 +206,19 @@ class LeaveBalanceService
         );
 
         return (float) $leaveRequest->days_count > $available;
+    }
+
+    /**
+     * Whether the whole of $year falls before the employee joined, in which case
+     * they are entitled to nothing for it. The Greek-law formula already handles
+     * this (and prorates the joining year); fixed-days and tiered leave types do
+     * not, and would otherwise hand a brand-new hire a full previous-year
+     * entitlement for a year they were not here.
+     */
+    private function wasNotEmployedIn(User $user, int $year): bool
+    {
+        return $user->hire_date
+            && $user->hire_date->greaterThan(now()->setYear($year)->endOfYear());
     }
 
     /**
@@ -252,8 +279,13 @@ class LeaveBalanceService
         $usedIn = fn (int $leaveTypeId, int $bucketYear): float => ($totals[$leaveTypeId][$bucketYear]['own'] ?? 0)
             + ($totals[$leaveTypeId][$bucketYear + 1]['carried'] ?? 0);
 
-        $deadline = $user->tenant?->carryoverDeadlineFor($year);
-        $carryoverStillOpen = $deadline && now()->lessThanOrEqualTo($deadline);
+        $tenant = $user->tenant;
+        $deadline = $tenant?->carryoverDeadlineFor($year);
+        $fromYear = $tenant?->carryover_from_year;
+
+        $carryoverStillOpen = $deadline
+            && now()->lessThanOrEqualTo($deadline)
+            && ($fromYear === null || ($year - 1) >= $fromYear);
 
         return $leaveTypes->map(function (LeaveType $leaveType) use ($user, $year, $overrides, $usedIn, $deadline, $carryoverStillOpen) {
             $entitled = $this->entitlementFor($user, $leaveType, $year, $overrides[$year][$leaveType->id] ?? null);
@@ -288,6 +320,10 @@ class LeaveBalanceService
     {
         if ($override !== null) {
             return (float) $override;
+        }
+
+        if ($this->wasNotEmployedIn($user, $year)) {
+            return 0;
         }
 
         $asOf = now()->setYear($year)->endOfYear();

@@ -18,6 +18,7 @@ class Tenant extends Model
         'slug',
         'carryover_deadline_month',
         'carryover_deadline_day',
+        'carryover_from_year',
     ];
 
     /**

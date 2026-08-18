@@ -189,3 +189,38 @@ it('recomputes the carry-over split at approval, not at submission', function ()
     expect($this->service->remainingDays($this->employee, $this->annual, 2025))->toBe(0.0)
         ->and($this->service->remainingDays($this->employee, $this->annual, 2026))->toBe(7.0);
 });
+
+it('offers nothing from a year before the company had complete records', function () {
+    // The company only started tracking leave in 2026, so 2025's "leftover" is
+    // an artefact of there being no data rather than real unused leave.
+    $this->tenant->update(['carryover_from_year' => 2026]);
+    useDaysIn2025($this->employee, $this->annual);
+
+    expect($this->service->carryoverAvailable($this->employee->fresh(), $this->annual, '2026-02-20'))->toBe(0.0)
+        ->and($this->service->availableFor($this->employee->fresh(), $this->annual, '2026-02-20'))->toBe(10.0);
+});
+
+it('offers carry-over once the source year is covered by the records', function () {
+    $this->tenant->update(['carryover_from_year' => 2025]);
+    useDaysIn2025($this->employee, $this->annual);
+
+    expect($this->service->carryoverAvailable($this->employee->fresh(), $this->annual, '2026-02-20'))->toBe(3.0);
+});
+
+it('treats an unset start year as no restriction', function () {
+    $this->tenant->update(['carryover_from_year' => null]);
+    useDaysIn2025($this->employee, $this->annual);
+
+    expect($this->service->carryoverAvailable($this->employee->fresh(), $this->annual, '2026-02-20'))->toBe(3.0);
+});
+
+it('hides the dashboard carry-over card for a year before the records start', function () {
+    $this->tenant->update(['carryover_from_year' => 2026]);
+    useDaysIn2025($this->employee, $this->annual);
+
+    $summary = $this->service->summaryForUser($this->employee->fresh(), 2026)
+        ->firstWhere('leaveType.id', $this->annual->id);
+
+    expect($summary->carryoverRemaining)->toBe(0.0)
+        ->and($summary->carryoverExpiresAt)->toBeNull();
+});

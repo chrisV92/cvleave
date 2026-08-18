@@ -48,6 +48,20 @@ class EditCompanySettings extends EditTenantProfile
                             ->visible(fn ($get) => (bool) $get('allows_carryover'))
                             ->required(fn ($get) => (bool) $get('allows_carryover')),
 
+                        TextInput::make('carryover_from_year')
+                            ->label(__('Ισχύει για υπόλοιπα από το έτος'))
+                            ->numeric()
+                            ->minValue(2000)
+                            ->maxValue((int) now()->year + 1)
+                            ->default((int) now()->year)
+                            // Companies that enabled carry-over before this
+                            // setting existed have it unset; prefill the safe
+                            // answer rather than showing an empty required box.
+                            ->afterStateHydrated(fn ($component, $state) => $component->state($state ?? (int) now()->year))
+                            ->helperText(__('Το πρώτο έτος για το οποίο η εφαρμογή έχει πλήρη καταγραφή αδειών. Αν ξεκινήσατε φέτος, άφησέ το στο τρέχον έτος — αλλιώς οι υπάλληλοι θα εμφανιστούν να μεταφέρουν ολόκληρο έτος που δεν καταγράφηκε ποτέ.'))
+                            ->visible(fn ($get) => (bool) $get('allows_carryover'))
+                            ->required(fn ($get) => (bool) $get('allows_carryover')),
+
                         TextInput::make('carryover_deadline_day')
                             ->label(__('Ημέρα προθεσμίας'))
                             ->numeric()
@@ -68,6 +82,7 @@ class EditCompanySettings extends EditTenantProfile
         if (blank($data['carryover_deadline_month'] ?? null) || blank($data['carryover_deadline_day'] ?? null)) {
             $data['carryover_deadline_month'] = null;
             $data['carryover_deadline_day'] = null;
+            $data['carryover_from_year'] = null;
         }
 
         return $data;

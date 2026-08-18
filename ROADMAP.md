@@ -76,16 +76,26 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   time. Employees see them as a separate dashboard card with the expiry date.
   Nothing is materialised at year end — it is all computed, so no cron job.
 
-  ⚠️ **Open: adopting carry-over on an existing company.** The moment a company
-  enables it, anything not recorded as used last year counts as last year's
-  leftover — so a company that was not using CVLeave in the previous year will
-  see employees appear with a whole extra year of leave. The admin guide tells
-  admins to correct the previous year with manual balance overrides first, but
-  a real migration path (e.g. a per-tenant "carry-over applies from year X", or
-  a cap on carried days) would be better than relying on a documented warning.
+  Adopting carry-over on an existing company: handled by
+  `tenants.carryover_from_year` — the first year the app has complete records
+  for. Nothing carries over from earlier, so switching the feature on no longer
+  credits everyone with a year that was never tracked; the settings form
+  defaults it to the current year. Recent hires were already handled by
+  `hire_date` (the Greek-law formula prorates the joining year), and a related
+  bug was fixed at the same time: fixed-days and tiered leave types used to
+  ignore `hire_date` entirely and grant a full previous-year entitlement to
+  someone hired after that year ended.
 
-  Still not covered: a single request that *spans* the year boundary
-  (28 Dec – 5 Jan) is charged entirely to the year it starts in.
+  Still open:
+  - A single request that *spans* the year boundary (28 Dec – 5 Jan) is charged
+    entirely to the year it starts in.
+  - Fixed-days and tiered types do not prorate the *joining* year the way the
+    Greek-law formula does — a November hire gets the full fixed allowance.
+    That is arguably deliberate policy (many companies do grant the full
+    amount), so it would want to be a per-leave-type toggle rather than
+    imposed silently.
+  - A per-tenant cap on carried-over days, which several jurisdictions and
+    company policies impose. Unrelated to adoption, just not built.
 
 - **Onboarding flow** — self-serve company signup, not admin-provisioned users.
 - **Production hosting** — this currently runs on a home server over

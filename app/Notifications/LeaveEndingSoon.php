@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\LeaveRequest;
+use App\Support\PanelUrl;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -46,7 +47,7 @@ class LeaveEndingSoon extends Notification implements ShouldQueue
                     'intro' => __('Η άδεια του/της <strong>:name</strong> λήγει αύριο.', ['name' => $lr->user->name]),
                     'details' => $details,
                     'ctaLabel' => __('Δες το ημερολόγιο'),
-                    'ctaUrl' => url('/admin'),
+                    'ctaUrl' => PanelUrl::dashboardForUser($notifiable),
                 ]);
         }
 
@@ -63,7 +64,7 @@ class LeaveEndingSoon extends Notification implements ShouldQueue
                 'intro' => __('Η άδειά σου λήγει <strong>αύριο</strong> — τα λέμε πίσω στη δουλειά!'),
                 'details' => $details,
                 'ctaLabel' => __('Δες το ημερολόγιο'),
-                'ctaUrl' => url('/admin'),
+                'ctaUrl' => PanelUrl::dashboardForUser($notifiable),
             ]);
     }
 

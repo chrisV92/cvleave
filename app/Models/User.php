@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'tenant_id', 'hire_date', 'prior_experience_years', 'is_platform_admin'])]
@@ -24,6 +25,13 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
+
+    /**
+     * How long an emailed invitation stays usable. Deliberately much longer
+     * than a password reset: people are invited on a Friday and read their
+     * email on a Monday.
+     */
+    public const INVITATION_VALID_FOR_DAYS = 7;
 
     /**
      * Get the attributes that should be cast.
@@ -38,6 +46,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             'hire_date' => 'date',
             'prior_experience_years' => 'float',
             'is_platform_admin' => 'boolean',
+            'invitation_sent_at' => 'datetime',
         ];
     }
 
@@ -68,6 +77,38 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function canAccessTenant(Model $tenant): bool
     {
         return $this->tenant_id === $tenant->id;
+    }
+
+    /**
+     * Issues a fresh invitation, replacing any previous one, and returns the
+     * plaintext token for the email. Only its hash is stored.
+     */
+    public function generateInvitationToken(): string
+    {
+        $plain = Str::random(64);
+
+        $this->forceFill([
+            'invitation_token' => hash('sha256', $plain),
+            'invitation_sent_at' => now(),
+        ])->save();
+
+        return $plain;
+    }
+
+    public function hasPendingInvitation(): bool
+    {
+        return $this->invitation_token !== null
+            && $this->invitation_sent_at !== null
+            && $this->invitation_sent_at->addDays(self::INVITATION_VALID_FOR_DAYS)->isFuture();
+    }
+
+    public function acceptInvitation(string $password): void
+    {
+        $this->forceFill([
+            'password' => $password,
+            'invitation_token' => null,
+            'invitation_sent_at' => null,
+        ])->save();
     }
 
     public function canImpersonate(): bool

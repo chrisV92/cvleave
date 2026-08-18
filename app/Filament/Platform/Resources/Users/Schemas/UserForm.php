@@ -47,8 +47,10 @@ class UserForm
                     ->password()
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                     ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $operation) => $operation === 'create')
-                    ->label(fn (string $operation) => $operation === 'create' ? __('Password') : __('Νέο password (προαιρετικό)')),
+                    ->label(fn (string $operation) => $operation === 'create' ? __('Password (προαιρετικό)') : __('Νέο password (προαιρετικό)'))
+                    ->helperText(fn (string $operation) => $operation === 'create'
+                        ? __('Άφησέ το κενό για να σταλεί πρόσκληση με email, ώστε να ορίσει μόνος του κωδικό.')
+                        : null),
             ]);
     }
 }

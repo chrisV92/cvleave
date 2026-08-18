@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\LeaveRequest;
+use App\Support\PanelUrl;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -52,7 +53,7 @@ class LeaveRequestSubmitted extends Notification implements ShouldQueue
                 ]),
                 'details' => $details,
                 'ctaLabel' => __('Δες την αίτηση'),
-                'ctaUrl' => url('/admin/leave-requests?tableFilters[status][value]=pending'),
+                'ctaUrl' => PanelUrl::leaveRequestsForUser($notifiable, ['tableFilters' => ['status' => ['value' => 'pending']]]),
             ]);
     }
 
@@ -67,7 +68,7 @@ class LeaveRequestSubmitted extends Notification implements ShouldQueue
             ->actions([
                 Action::make('view')
                     ->label(__('Δες την αίτηση'))
-                    ->url('/admin/leave-requests?tableFilters[status][value]=pending')
+                    ->url(PanelUrl::leaveRequestsForUser($notifiable, ['tableFilters' => ['status' => ['value' => 'pending']]]))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

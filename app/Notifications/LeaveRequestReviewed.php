@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\LeaveRequest;
+use App\Support\PanelUrl;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -57,7 +58,7 @@ class LeaveRequestReviewed extends Notification implements ShouldQueue
                     : __('Δυστυχώς η αίτηση άδειάς σου απορρίφθηκε — δες την αιτία παρακάτω.'),
                 'details' => $details,
                 'ctaLabel' => __('Δες την αίτηση'),
-                'ctaUrl' => url('/admin/leave-requests'),
+                'ctaUrl' => PanelUrl::leaveRequestsForUser($notifiable),
             ]);
     }
 
@@ -73,7 +74,7 @@ class LeaveRequestReviewed extends Notification implements ShouldQueue
             ->actions([
                 Action::make('view')
                     ->label(__('Δες την αίτηση'))
-                    ->url('/admin/leave-requests')
+                    ->url(PanelUrl::leaveRequestsForUser($notifiable))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

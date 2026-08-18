@@ -54,11 +54,21 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   `LeaveImpersonation` events) and browsable read-only in the Platform panel
   under "Ιστορικό Impersonation".
 
+  Employee invitations: done — leaving the password blank when creating a user
+  emails them a link to set their own (`users.invitation_token`, a sha256 of
+  what was sent, valid 7 days, single use). Pending/expired invitations are
+  flagged in the users table with a resend action that invalidates the old
+  link. Setting a password manually still works, which matters while a real
+  SMTP provider is outstanding. Fixed alongside: every notification email
+  linked to `/admin/leave-requests`, which stopped resolving when tenancy made
+  panel routes `/admin/{tenant}/...` — links now go through `App\Support\PanelUrl`
+  and a test asserts each CTA matches a real route.
+
   Still missing (in rough priority order):
-  - Self-service tenant registration/invite flow (email/token-based, instead
-    of an admin manually creating each employee).
   - Granular permissions beyond the current binary admin/employee.
   - A global/cross-tenant LeaveRequests view in the platform panel.
+  - Self-service *company* signup (a stranger creating a tenant) — distinct
+    from employee invitations above; see the Onboarding flow item.
 - **Billing** — Stripe/subscription integration, plan limits, trial handling.
 - **Legal validation** — the Greek-law formula should be reviewed by an
   accountant/lawyer before being relied on for real payroll decisions, and

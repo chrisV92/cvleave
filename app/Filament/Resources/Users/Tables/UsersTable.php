@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Models\User;
+use App\Notifications\UserInvitation;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -35,6 +37,16 @@ class UsersTable
                         'employee' => __('Υπάλληλος'),
                         default => $state,
                     }),
+                TextColumn::make('invitation_sent_at')
+                    ->label(__('Πρόσκληση'))
+                    ->badge()
+                    ->color('warning')
+                    ->placeholder('—')
+                    ->getStateUsing(fn (User $record) => match (true) {
+                        $record->hasPendingInvitation() => __('Εκκρεμεί'),
+                        $record->invitation_token !== null => __('Έληξε'),
+                        default => null,
+                    }),
                 TextColumn::make('hire_date')
                     ->label(__('Πρόσληψη'))
                     ->date('d/m/Y')
@@ -44,6 +56,21 @@ class UsersTable
                 //
             ])
             ->recordActions([
+                Action::make('resendInvitation')
+                    ->label(__('Επαναποστολή πρόσκλησης'))
+                    ->icon('heroicon-o-envelope')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record) => $record->invitation_token !== null)
+                    ->action(function (User $record) {
+                        // A fresh token invalidates the previous link.
+                        $record->notify(new UserInvitation($record->generateInvitationToken()));
+
+                        Notification::make()
+                            ->title(__('Η πρόσκληση στάλθηκε ξανά'))
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('pdfReport')
                     ->label(__('Αναφορά PDF'))
                     ->icon('heroicon-o-document-arrow-down')

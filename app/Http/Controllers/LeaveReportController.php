@@ -13,7 +13,11 @@ class LeaveReportController extends Controller
     public function employee(User $user, LeaveBalanceService $service): Response
     {
         $viewer = auth()->user();
-        abort_unless($viewer && ($viewer->isAdmin() || $viewer->id === $user->id), 403);
+        abort_unless($viewer && (
+            $viewer->id === $user->id
+            || $viewer->is_platform_admin
+            || ($viewer->isAdmin() && $viewer->tenant_id === $user->tenant_id)
+        ), 403);
 
         $year = now()->year;
         $summary = $service->summaryForUser($user, $year);
@@ -42,6 +46,7 @@ class LeaveReportController extends Controller
         abort_unless($viewer && $viewer->isAdmin(), 403);
 
         $leaveRequests = LeaveRequest::query()
+            ->whereHas('user', fn ($query) => $query->where('tenant_id', $viewer->tenant_id))
             ->with(['user', 'leaveType', 'reviewer'])
             ->orderBy('user_id')
             ->orderByDesc('start_date')

@@ -31,11 +31,19 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   automatically on tenant creation. Phase 2 done: a separate `platform` Filament
   panel (`/platform`, no tenant scoping) for the SaaS owner, gated by a plain
   `is_platform_admin` flag on `users` (independent of the tenant-scoped Spatie
-  roles), with `Tenants` and cross-tenant `Users` resources. Still missing:
-  self-service tenant registration/invite flow, granular permissions beyond
-  admin/employee, tenant-scoping on exports (`LeaveRequestExporter`) and the
-  all-employees PDF report route, and a global/cross-tenant LeaveRequests view
-  in the platform panel.
+  roles), with `Tenants` and cross-tenant `Users` resources.
+
+  Tenant-scoping on exports/reports: done — `LeaveRequestExporter` (Excel) was
+  already safe (rides on the resource's scoped table query); the
+  `reports/employee/{user}` and `reports/all-employees` PDF routes were the
+  real cross-tenant leak (any admin could view/download another company's
+  data) and are now scoped to the viewer's own tenant.
+
+  Still missing (in rough priority order):
+  - Self-service tenant registration/invite flow (email/token-based, instead
+    of an admin manually creating each employee).
+  - Granular permissions beyond the current binary admin/employee.
+  - A global/cross-tenant LeaveRequests view in the platform panel.
 - **Billing** — Stripe/subscription integration, plan limits, trial handling.
 - **Legal validation** — the Greek-law formula should be reviewed by an
   accountant/lawyer before being relied on for real payroll decisions, and

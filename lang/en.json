@@ -237,5 +237,12 @@
     "Εταιρεία": "Company",
     "Slug": "Slug",
     "Χρησιμοποιείται στο URL του panel της εταιρείας, π.χ. /admin/η-εταιρεία-μου": "Used in the company's panel URL, e.g. /admin/my-company",
-    "Δημιουργήθηκε": "Created"
+    "Δημιουργήθηκε": "Created",
+    "Είσοδος ως": "Login as",
+    "Πρώτος Admin": "First Admin",
+    "Δημιουργείται αυτόματα ως ο πρώτος διαχειριστής της εταιρείας.": "Created automatically as the company's first administrator.",
+    "Ιστορικό Impersonation": "Impersonation Log",
+    "Ξεκίνησε": "Started",
+    "Έληξε": "Ended",
+    "— σε εξέλιξη —": "— in progress —"
 }

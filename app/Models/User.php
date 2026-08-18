@@ -70,6 +70,16 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return $this->tenant_id === $tenant->id;
     }
 
+    public function canImpersonate(): bool
+    {
+        return (bool) $this->is_platform_admin;
+    }
+
+    public function canBeImpersonated(): bool
+    {
+        return ! $this->is_platform_admin;
+    }
+
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);

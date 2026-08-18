@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Spatie\Permission\PermissionRegistrar;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 class UsersTable
 {
@@ -53,6 +54,9 @@ class UsersTable
                     ->relationship('tenant', 'name'),
             ])
             ->recordActions([
+                Impersonate::make()
+                    ->label(__('Είσοδος ως'))
+                    ->redirectTo(fn (User $record) => "/admin/{$record->tenant->slug}"),
                 EditAction::make(),
             ])
             ->toolbarActions([

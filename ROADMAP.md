@@ -39,6 +39,21 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   real cross-tenant leak (any admin could view/download another company's
   data) and are now scoped to the viewer's own tenant.
 
+  Auto-create the first tenant admin on tenant creation: done — the Platform
+  `TenantForm` now has a "Πρώτος Admin" section (name/email/password);
+  `CreateTenant` creates that `User` and assigns the `admin` role for the new
+  tenant in `afterCreate()`, so a company is never left without anyone who
+  can log in.
+
+  Impersonation: done — `stechstudio/filament-impersonate` wired into the
+  Platform `Users` table ("Είσοδος ως" row action, gated by
+  `User::canImpersonate()`/`canBeImpersonated()` so only platform admins can
+  impersonate, and never another platform admin), redirecting into the
+  target's own tenant panel. Every start/end is logged to a new
+  `impersonation_logs` table (via the package's `EnterImpersonation`/
+  `LeaveImpersonation` events) and browsable read-only in the Platform panel
+  under "Ιστορικό Impersonation".
+
   Still missing (in rough priority order):
   - Self-service tenant registration/invite flow (email/token-based, instead
     of an admin manually creating each employee).

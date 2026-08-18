@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Πρόσκληση στο CVLeave') }}</title>
+    <title>{{ __('Πρόσκληση στο CvTech') }}</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -19,18 +19,18 @@
         p { font-size: 14px; line-height: 1.6; color: #52525b; margin: 0 0 20px; }
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
         input[type=password] { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid #d4d4d8; border-radius: 8px; margin-bottom: 16px; }
-        input[type=password]:focus { outline: 2px solid #d97706; outline-offset: -1px; border-color: #d97706; }
-        button { width: 100%; padding: 12px; font-size: 14px; font-weight: 700; color: #fff; background: #d97706; border: 0; border-radius: 8px; cursor: pointer; }
-        button:hover { background: #b45309; }
+        input[type=password]:focus { outline: 2px solid #6366f1; outline-offset: -1px; border-color: #6366f1; }
+        button { width: 100%; padding: 12px; font-size: 14px; font-weight: 700; color: #fff; background: #4f46e5; border: 0; border-radius: 8px; cursor: pointer; }
+        button:hover { background: #4338ca; }
         .errors { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: 13px; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; }
         .errors ul { margin: 0; padding-left: 18px; }
         .muted { font-size: 13px; color: #71717a; }
-        .link { color: #b45309; font-weight: 600; }
+        .link { color: #4f46e5; font-weight: 600; }
     </style>
 </head>
 <body>
 <div class="card">
-    <p class="brand">CVLeave</p>
+    <p class="brand">CvTech</p>
     <p class="tagline">{{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
 
     @if ($invalid)

@@ -28,8 +28,12 @@ class PlatformPanelProvider extends PanelProvider
             ->login()
             ->passwordReset()
             ->profile(isSimple: false)
+            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogoHeight('30px')
+            ->favicon(asset('img/brand/favicon.svg'))
             ->colors([
                 'primary' => Color::Indigo,
+                'gray' => Color::Slate,
             ])
             ->discoverResources(in: app_path('Filament/Platform/Resources'), for: 'App\Filament\Platform\Resources')
             ->discoverPages(in: app_path('Filament/Platform/Pages'), for: 'App\Filament\Platform\Pages')

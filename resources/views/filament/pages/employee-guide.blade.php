@@ -8,8 +8,8 @@
     .kb-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
     .kb-toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
     .kb-toc a { display: block; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: #71717a; font-weight: 600; font-size: 14px; border-left: 3px solid transparent; }
-    .kb-toc a:hover { background-color: #fafafa; color: #b45309; }
-    .kb-toc a.kb-toc-active { background-color: #fffbeb; color: #b45309; border-left-color: #d97706; }
+    .kb-toc a:hover { background-color: #fafafa; color: #4f46e5; }
+    .kb-toc a.kb-toc-active { background-color: #eef2ff; color: #4f46e5; border-left-color: #6366f1; }
     [id] { scroll-margin-top: 100px; }
     @media (max-width: 900px) {
         .kb-layout { grid-template-columns: 1fr; }

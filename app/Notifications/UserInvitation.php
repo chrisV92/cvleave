@@ -37,15 +37,15 @@ class UserInvitation extends Notification implements ShouldQueue
         ]);
 
         return (new MailMessage)
-            ->subject(__('Πρόσκληση στο CVLeave'))
+            ->subject(__('Πρόσκληση στο CvTech'))
             ->view('emails.leave-notification', [
-                'title' => __('Πρόσκληση στο CVLeave'),
-                'accent' => '#d97706',
-                'accentDark' => '#92400e',
-                'badgeBg' => '#fef3c7',
-                'badgeText' => '#92400e',
+                'title' => __('Πρόσκληση στο CvTech'),
+                'accent' => '#4f46e5',
+                'accentDark' => '#4338ca',
+                'badgeBg' => '#eef2ff',
+                'badgeText' => '#4338ca',
                 'badgeLabel' => __('Πρόσκληση'),
-                'heading' => __('Καλώς ήρθες στο CVLeave 👋'),
+                'heading' => __('Καλώς ήρθες στο CvTech 👋'),
                 'intro' => $company
                     ? __('Ο διαχειριστής της <strong>:company</strong> σου δημιούργησε λογαριασμό. Όρισε τον κωδικό σου για να ξεκινήσεις.', ['company' => $company])
                     : __('Σου δημιουργήθηκε λογαριασμός. Όρισε τον κωδικό σου για να ξεκινήσεις.'),

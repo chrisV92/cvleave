@@ -29,7 +29,7 @@
 
 <tr>
 <td class="header" style="background: linear-gradient(135deg, {{ $accent }} 0%, {{ $accentDark }} 100%); padding: 28px 32px; text-align: center;">
-<p class="brand">CVLeave</p>
+<p class="brand">CvTech</p>
 <p class="tagline">{{ __('Διαχείριση Αδειών') }}</p>
 </td>
 </tr>
@@ -69,7 +69,7 @@
 
 <tr>
 <td class="footer" align="center" style="padding: 24px 32px; border-top: 1px solid #f0f0f1;">
-<p><strong>CVLeave</strong> — {{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
+<p><strong>CvTech</strong> — {{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
 <p>{{ config('app.name') }}</p>
 </td>
 </tr>

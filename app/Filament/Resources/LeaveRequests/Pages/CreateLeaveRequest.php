@@ -25,6 +25,21 @@ class CreateLeaveRequest extends CreateRecord
 
         $data['end_date'] ??= $data['start_date'];
 
+        $user = User::find($data['user_id'] ?? auth()->id());
+        $leaveType = LeaveType::find($data['leave_type_id']);
+
+        if ($user && $leaveType) {
+            // Carried-over days are spent before this year's, since they expire.
+            // Re-checked authoritatively at approval time, because what is
+            // available can move while the request sits pending.
+            $data['days_from_carryover'] = app(LeaveBalanceService::class)->allocateFromCarryover(
+                $user,
+                $leaveType,
+                $data['start_date'],
+                (float) $data['days_count'],
+            );
+        }
+
         return $data;
     }
 
@@ -49,14 +64,15 @@ class CreateLeaveRequest extends CreateRecord
             $this->halt();
         }
 
-        $remaining = $service->remainingDays($user, $leaveType, $year);
+        // Includes any still-usable leftover from last year, not just this year.
+        $available = $service->availableFor($user, $leaveType, $data['start_date']);
 
-        if ($data['days_count'] > $remaining) {
+        if ($data['days_count'] > $available) {
             Notification::make()
                 ->title(__('Ανεπαρκές υπόλοιπο ημερών'))
                 ->body(__('Ο/Η :name έχει μόνο :remaining διαθέσιμες μέρες για :type το :year, ζητήθηκαν :requested.', [
                     'name' => $user->name,
-                    'remaining' => $remaining,
+                    'remaining' => $available,
                     'type' => $leaveType->name,
                     'year' => $year,
                     'requested' => $data['days_count'],

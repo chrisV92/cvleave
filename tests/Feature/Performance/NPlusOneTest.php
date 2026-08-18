@@ -43,6 +43,12 @@ it('runs the dashboard leave-balance summary in a constant number of queries reg
 
     $service = app(LeaveBalanceService::class);
 
+    // Warm up first: the summary lazy-loads the user's tenant once (for the
+    // carry-over deadline), which would otherwise show up as a one-off extra
+    // query in the first measurement and mask what this test is about — that
+    // the count does not grow with the number of leave types.
+    $service->summaryForUser($user, now()->year);
+
     DB::enableQueryLog();
     $service->summaryForUser($user, now()->year);
     $queriesFor2Types = count(DB::getQueryLog());

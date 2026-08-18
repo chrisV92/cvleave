@@ -20,6 +20,7 @@ class LeaveType extends Model
         'use_greek_law_formula',
         'fixed_days_per_year',
         'is_active',
+        'allows_carryover',
     ];
 
     protected function casts(): array
@@ -29,6 +30,7 @@ class LeaveType extends Model
             'auto_calculate' => 'boolean',
             'use_greek_law_formula' => 'boolean',
             'is_active' => 'boolean',
+            'allows_carryover' => 'boolean',
         ];
     }
 

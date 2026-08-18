@@ -33,6 +33,7 @@ class LeaveRequest extends Model
         'duration_type',
         'hours',
         'days_count',
+        'days_from_carryover',
         'status',
         'note',
         'reviewed_by',
@@ -48,6 +49,7 @@ class LeaveRequest extends Model
             'reviewed_at' => 'datetime',
             'hours' => 'float',
             'days_count' => 'float',
+            'days_from_carryover' => 'float',
         ];
     }
 

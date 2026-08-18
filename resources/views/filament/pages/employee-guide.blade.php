@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'dashboard',
-        ids: ['dashboard', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account'],
+        ids: ['dashboard', 'carryover', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -39,12 +39,13 @@
         <x-filament::section heading="{{ __('Γρήγορη Πλοήγηση') }}" icon="heroicon-o-list-bullet">
             <ul class="kb-toc">
                 <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">1. {{ __('Ο Πίνακας Ελέγχου σου') }}</a></li>
-                <li><a href="#submit-request" :class="active === 'submit-request' && 'kb-toc-active'">2. {{ __('Πώς να υποβάλεις αίτηση άδειας') }}</a></li>
-                <li><a href="#partial-leave" :class="active === 'partial-leave' && 'kb-toc-active'">3. {{ __('Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)') }}</a></li>
-                <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">4. {{ __('Οι Αιτήσεις σου') }}</a></li>
-                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">5. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
-                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">6. {{ __('Ειδοποιήσεις') }}</a></li>
-                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">7. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
+                <li><a href="#carryover" :class="active === 'carryover' && 'kb-toc-active'">2. {{ __('Μέρες από το προηγούμενο έτος') }}</a></li>
+                <li><a href="#submit-request" :class="active === 'submit-request' && 'kb-toc-active'">3. {{ __('Πώς να υποβάλεις αίτηση άδειας') }}</a></li>
+                <li><a href="#partial-leave" :class="active === 'partial-leave' && 'kb-toc-active'">4. {{ __('Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)') }}</a></li>
+                <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">5. {{ __('Οι Αιτήσεις σου') }}</a></li>
+                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">6. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
+                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">7. {{ __('Ειδοποιήσεις') }}</a></li>
+                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">8. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -58,6 +59,18 @@
             <p>{{ __('Κάθε κάρτα δείχνει: πόσες μέρες σου έχουν μείνει / πόσες δικαιούσαι συνολικά φέτος, και πόσες έχεις ήδη χρησιμοποιήσει. Το υπόλοιπο υπολογίζεται αυτόματα βάσει της προϋπηρεσίας σου (ή έχει οριστεί χειροκίνητα από τον διαχειριστή).') }}</p>
             <p>{{ __('Στο ημερολόγιο βλέπεις μόνο τις δικές σου άδειες (εγκεκριμένες και εκκρεμείς).') }}</p>
             <p>{{ __('Ολόκληρη η εφαρμογή αφορά μόνο τη δική σου εταιρεία — δεν βλέπεις ποτέ συναδέλφους ή δεδομένα άλλης εταιρείας.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="carryover" heading="{{ __('Μέρες από το προηγούμενο έτος') }}" icon="heroicon-o-arrow-path">
+        <div class="kb-section">
+            <p>{{ __('Αν η εταιρεία σου το επιτρέπει, οι μέρες άδειας που δεν πρόλαβες να χρησιμοποιήσεις πέρσι μεταφέρονται στο νέο έτος — αλλά μόνο μέχρι μια συγκεκριμένη ημερομηνία (π.χ. 31 Μαρτίου).') }}</p>
+            <p>{{ __('Στον Πίνακα Ελέγχου θα δεις γι\' αυτές ξεχωριστή κάρτα, με την ένδειξη πότε λήγουν. Δεν προστίθενται στο φετινό σου υπόλοιπο· εμφανίζονται χωριστά ακριβώς για να ξέρεις τι κινδυνεύεις να χάσεις.') }}</p>
+            <ul>
+                <li>{{ __('Όταν υποβάλλεις άδεια, χρησιμοποιούνται ΠΡΩΤΑ οι περσινές μέρες, αφού αυτές λήγουν.') }}</li>
+                <li>{{ __('Μια αίτηση μπορεί να καλύψει και τα δύο: π.χ. αν σου έχουν μείνει 3 περσινές μέρες και ζητήσεις 5, θα πάρει 3 από πέρσι και 2 από φέτος.') }}</li>
+                <li>{{ __('Μετά την ημερομηνία λήξης, οι περσινές μέρες παύουν να είναι διαθέσιμες και η κάρτα εξαφανίζεται.') }}</li>
+            </ul>
         </div>
     </x-filament::section>
 

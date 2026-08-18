@@ -32,6 +32,19 @@ class EditLeaveRequest extends EditRecord
 
         $data['end_date'] ??= $data['start_date'];
 
+        $user = User::find($data['user_id'] ?? $this->record->user_id);
+        $leaveType = LeaveType::find($data['leave_type_id']);
+
+        if ($user && $leaveType) {
+            $data['days_from_carryover'] = app(LeaveBalanceService::class)->allocateFromCarryover(
+                $user,
+                $leaveType,
+                $data['start_date'],
+                (float) $data['days_count'],
+                excludeLeaveRequestId: $this->record->getKey(),
+            );
+        }
+
         return $data;
     }
 
@@ -65,7 +78,7 @@ class EditLeaveRequest extends EditRecord
 
         // Employees can only edit their own PENDING requests (see canEdit()), which are
         // never counted in usedDays() — so no adjustment is needed here.
-        $remaining = $service->remainingDays($this->record->user, $leaveType, $year);
+        $remaining = $service->availableFor($this->record->user, $leaveType, $data['start_date']);
 
         if ($data['days_count'] > $remaining) {
             Notification::make()
@@ -98,7 +111,7 @@ class EditLeaveRequest extends EditRecord
         $leaveType = LeaveType::find($data['leave_type_id']);
         $year = Carbon::parse($data['start_date'])->year;
 
-        $remaining = $service->remainingDays($user, $leaveType, $year, excludeLeaveRequestId: $this->record->getKey());
+        $remaining = $service->availableFor($user, $leaveType, $data['start_date'], excludeLeaveRequestId: $this->record->getKey());
 
         if ((float) $data['days_count'] > $remaining) {
             Notification::make()

@@ -13,16 +13,40 @@ class MyLeaveBalances extends BaseWidget
     public function getStats(): array
     {
         $service = app(LeaveBalanceService::class);
+        $year = now()->year;
+        $stats = [];
 
-        return $service->summaryForUser(auth()->user(), now()->year)
-            ->map(function ($summary) {
-                return Stat::make(
-                    $summary->leaveType->name,
-                    __(':remaining / :entitled μέρες', ['remaining' => $summary->remaining, 'entitled' => $summary->entitled])
+        foreach ($service->summaryForUser(auth()->user(), $year) as $summary) {
+            // Days carried over from last year get their own card, ahead of the
+            // current-year one, because they expire and should be used first.
+            if ($summary->carryoverRemaining > 0) {
+                $stats[] = Stat::make(
+                    $summary->leaveType->name.' — '.__('από :year', ['year' => $year - 1]),
+                    __(':remaining / :entitled μέρες', [
+                        'remaining' => $summary->carryoverRemaining,
+                        'entitled' => $summary->carryoverEntitled,
+                    ])
                 )
-                    ->description(__('Χρησιμοποιήθηκαν :used μέρες το :year', ['used' => $summary->used, 'year' => now()->year]))
-                    ->color($summary->remaining > 0 ? 'success' : 'danger');
-            })
-            ->toArray();
+                    ->description(__('Λήγουν :date — χρησιμοποιούνται πρώτες', [
+                        'date' => $summary->carryoverExpiresAt?->format('d/m/Y'),
+                    ]))
+                    ->color('warning');
+            }
+
+            $stats[] = Stat::make(
+                $summary->leaveType->name,
+                __(':remaining / :entitled μέρες', [
+                    'remaining' => $summary->remaining,
+                    'entitled' => $summary->entitled,
+                ])
+            )
+                ->description(__('Χρησιμοποιήθηκαν :used μέρες το :year', [
+                    'used' => $summary->used,
+                    'year' => $year,
+                ]))
+                ->color($summary->remaining > 0 ? 'success' : 'danger');
+        }
+
+        return $stats;
     }
 }

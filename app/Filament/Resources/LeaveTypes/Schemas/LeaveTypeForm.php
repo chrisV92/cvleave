@@ -40,6 +40,10 @@ class LeaveTypeForm
                     ->minValue(0)
                     ->visible(fn ($get) => ! $get('auto_calculate'))
                     ->required(fn ($get) => ! $get('auto_calculate')),
+                Toggle::make('allows_carryover')
+                    ->label(__('Μεταφορά αχρησιμοποίητων ημερών στο επόμενο έτος'))
+                    ->helperText(__('Αφορά κυρίως την Κανονική Άδεια. Η προθεσμία χρήσης τους ορίζεται στις Ρυθμίσεις Εταιρείας.'))
+                    ->default(false),
                 Toggle::make('is_active')
                     ->label(__('Ενεργό'))
                     ->default(true),

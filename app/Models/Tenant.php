@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -15,7 +16,33 @@ class Tenant extends Model
     protected $fillable = [
         'name',
         'slug',
+        'carryover_deadline_month',
+        'carryover_deadline_day',
     ];
+
+    /**
+     * The date, in the given year, up to which employees may still draw on the
+     * previous year's leftover leave. Null when this company does not allow
+     * carry-over at all.
+     */
+    public function carryoverDeadlineFor(int $year): ?Carbon
+    {
+        if (! $this->carryover_deadline_month || ! $this->carryover_deadline_day) {
+            return null;
+        }
+
+        $endOfMonth = Carbon::create($year, $this->carryover_deadline_month, 1)->endOfMonth();
+
+        // Guards against a deadline of e.g. the 31st in a 30-day month.
+        return $endOfMonth->copy()
+            ->setDay(min($this->carryover_deadline_day, $endOfMonth->day))
+            ->endOfDay();
+    }
+
+    public function allowsCarryover(): bool
+    {
+        return $this->carryover_deadline_month !== null && $this->carryover_deadline_day !== null;
+    }
 
     public function users(): HasMany
     {
@@ -56,6 +83,7 @@ class Tenant extends Model
                 'requires_note' => false,
                 'auto_calculate' => true,
                 'use_greek_law_formula' => true,
+                'allows_carryover' => true,
                 'is_active' => true,
             ]
         );

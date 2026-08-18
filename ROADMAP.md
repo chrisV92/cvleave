@@ -64,56 +64,29 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   accountant/lawyer before being relied on for real payroll decisions, and
   edge cases (six-day work week, part-time, parental leave, etc.) aren't
   covered yet.
-- **Year-boundary leave accounting / carry-over** — two related gaps, both
-  currently unhandled:
+- **Year-boundary leave carry-over** — implemented. Each company sets its own
+  cutoff in Company Settings (`tenants.carryover_deadline_month/day`; unset
+  means no carry-over), and each leave type opts in via
+  `leave_types.allows_carryover` — annual leave typically, not sick or unpaid.
+  `leave_requests.days_from_carryover` records how much of a request was drawn
+  from the previous year, so one request can legitimately straddle both years
+  (3 days from last year + 2 from this one) while staying a single row.
+  Carried-over days are spent first, since they expire, and the split is
+  recomputed authoritatively at approval rather than trusted from submission
+  time. Employees see them as a separate dashboard card with the expiry date.
+  Nothing is materialised at year end — it is all computed, so no cron job.
 
-  1. *A request spanning the year boundary.* `LeaveBalanceService::usedDays()`
-     buckets a request by `start_date`'s year, so leave running 28 Dec – 5 Jan
-     is charged entirely to the starting year instead of being split.
-  2. *Carry-over into the next year.* Greek practice appears to allow leave
-     accrued in one year to still be taken early in the next (commonly cited
-     as up to 31 March). Today the app has no concept of this at all: a
-     January request is charged against the **new** year's entitlement, so
-     last year's unused days are silently lost, and there is no deadline
-     after which they expire.
+  ⚠️ **Open: adopting carry-over on an existing company.** The moment a company
+  enables it, anything not recorded as used last year counts as last year's
+  leftover — so a company that was not using CVLeave in the previous year will
+  see employees appear with a whole extra year of leave. The admin guide tells
+  admins to correct the previous year with manual balance overrides first, but
+  a real migration path (e.g. a per-tenant "carry-over applies from year X", or
+  a cap on carried days) would be better than relying on a documented warning.
 
-  **Agreed direction: make the deadline a per-tenant setting.** Rather than
-  hardcoding "31 March" — which would bake a guessed legal rule into the
-  product — each company configures its own carry-over cutoff, and can turn
-  carry-over off entirely. Greek tenants set 31 March; anyone else sets what
-  their own law or policy says. This also removes the legal uncertainty as a
-  blocker: the app enforces whatever the customer configures rather than
-  asserting what the law is.
+  Still not covered: a single request that *spans* the year boundary
+  (28 Dec – 5 Jan) is charged entirely to the year it starts in.
 
-  **Shape of the change:**
-  - `tenants.carryover_deadline` (nullable, e.g. month+day) — null means no
-    carry-over for that company.
-  - `leave_types.allows_carryover` (boolean) — carry-over should apply to
-    annual leave, not to sick or unpaid leave, so the toggle belongs per leave
-    type as well as per tenant.
-  - `leave_requests.days_from_carryover` (decimal, default 0) — how much of
-    this request was drawn from the previous year's balance. Keeps one row per
-    request (see "split across two years" below) while making the accounting
-    explicit and auditable.
-  - `LeaveBalanceService` gains a carry-over aware balance: entitlement for
-    year N, minus days charged to N, where days charged to N include the
-    `days_from_carryover` portion of requests taken in year N+1 before the
-    cutoff. Nothing needs materialising at year end — it can all be computed,
-    so no cron job.
-  - Employee dashboard shows carried-over days as their own card, separate
-    from the current year, with the expiry date visible — e.g.
-    "5 / 22 από 2026 (λήγουν 31/03/2027)" next to "22 / 22 για 2027".
-
-  **Two decisions still open:**
-  1. *Consumption order.* Old balance first is the obvious default, since
-     carried-over days expire — but it should be deliberate and stated in the
-     UI, otherwise employees will not understand which days a request ate.
-  2. *A request that straddles both buckets.* Someone with 3 carried-over days
-     requesting 5 days in February draws 3 from last year and 2 from this one.
-     That is why `days_from_carryover` sits on the request rather than a plain
-     `charged_year` column — one request can legitimately be charged to two
-     years, and splitting it into two rows would misrepresent what the
-     employee actually submitted.
 - **Onboarding flow** — self-serve company signup, not admin-provisioned users.
 - **Production hosting** — this currently runs on a home server over
   Tailscale; a public product needs real infrastructure, backups, uptime.

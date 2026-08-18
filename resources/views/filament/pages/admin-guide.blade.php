@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'dashboard',
-        ids: ['dashboard', 'approve-reject', 'manage-users', 'leave-types', 'export-report', 'balance-override', 'reminders'],
+        ids: ['dashboard', 'approve-reject', 'manage-users', 'leave-types', 'carryover-settings', 'export-report', 'balance-override', 'reminders'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -42,9 +42,10 @@
                 <li><a href="#approve-reject" :class="active === 'approve-reject' && 'kb-toc-active'">2. {{ __('Έγκριση / Απόρριψη Αιτήσεων') }}</a></li>
                 <li><a href="#manage-users" :class="active === 'manage-users' && 'kb-toc-active'">3. {{ __('Διαχείριση Χρηστών') }}</a></li>
                 <li><a href="#leave-types" :class="active === 'leave-types' && 'kb-toc-active'">4. {{ __('Τύποι Αδειών & Υπολογισμός Δικαιώματος') }}</a></li>
-                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">5. {{ __('Εξαγωγή & Αναφορές PDF') }}</a></li>
-                <li><a href="#balance-override" :class="active === 'balance-override' && 'kb-toc-active'">6. {{ __('Χειροκίνητη Ρύθμιση Υπολοίπου (Override)') }}</a></li>
-                <li><a href="#reminders" :class="active === 'reminders' && 'kb-toc-active'">7. {{ __('Αυτόματες Υπενθυμίσεις') }}</a></li>
+                <li><a href="#carryover-settings" :class="active === 'carryover-settings' && 'kb-toc-active'">5. {{ __('Μεταφορά Υπολοίπου στο Επόμενο Έτος') }}</a></li>
+                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">6. {{ __('Εξαγωγή & Αναφορές PDF') }}</a></li>
+                <li><a href="#balance-override" :class="active === 'balance-override' && 'kb-toc-active'">7. {{ __('Χειροκίνητη Ρύθμιση Υπολοίπου (Override)') }}</a></li>
+                <li><a href="#reminders" :class="active === 'reminders' && 'kb-toc-active'">8. {{ __('Αυτόματες Υπενθυμίσεις') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -96,6 +97,20 @@
             </ul>
             <img src="{{ asset('img/kb/10-admin-leave-type-edit.png') }}" class="kb-shot" alt="Leave type edit form with Greek law toggle">
             <p>{{ __('Το πεδίο "Απαιτεί σημείωση/αιτιολογία" κάνει υποχρεωτικό το πεδίο σημείωσης όταν κάποιος υποβάλλει αυτόν τον τύπο άδειας (π.χ. λόγος αναρρωτικής).') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="carryover-settings" heading="{{ __('Μεταφορά Υπολοίπου στο Επόμενο Έτος') }}" icon="heroicon-o-arrow-path">
+        <div class="kb-section">
+            <p>{{ __('Μπορείς να επιτρέψεις στους υπαλλήλους να χρησιμοποιούν τις αχρησιμοποίητες μέρες της περσινής τους άδειας μέσα στο νέο έτος, μέχρι μια προθεσμία που ορίζεις εσύ.') }}</p>
+            <p>{{ __('Η ρύθμιση γίνεται σε δύο σημεία:') }}</p>
+            <ol>
+                <li>{{ __('Στις "Ρυθμίσεις Εταιρείας" (από το μενού της εταιρείας πάνω αριστερά) ενεργοποιείς τη μεταφορά και ορίζεις την προθεσμία — π.χ. 31 Μαρτίου.') }}</li>
+                <li>{{ __('Σε κάθε "Τύπο Άδειας" ξεχωριστά, ενεργοποιείς το "Μεταφορά αχρησιμοποίητων ημερών στο επόμενο έτος". Συνήθως αφορά μόνο την Κανονική Άδεια, όχι την Αναρρωτική ή την Άνευ Αποδοχών.') }}</li>
+            </ol>
+            <p><strong>{{ __('Σημαντικό:') }}</strong> {{ __('η προθεσμία δεν είναι κλειδωμένη στη νομοθεσία κάποιας χώρας — ορίζεις ό,τι ισχύει για την εταιρεία σου. Στην Ελλάδα συνηθίζεται η 31η Μαρτίου, αλλά επιβεβαίωσέ το.') }}</p>
+            <p><strong>{{ __('Προσοχή κατά την ενεργοποίηση:') }}</strong> {{ __('μόλις την ενεργοποιήσεις, το σύστημα θεωρεί ως "περσινό υπόλοιπο" ό,τι δεν είχε καταγραφεί ως χρησιμοποιημένο πέρσι. Αν η εταιρεία δεν χρησιμοποιούσε την εφαρμογή πέρσι, οι υπάλληλοι μπορεί να εμφανιστούν με ολόκληρο το περσινό δικαίωμα. Διόρθωσέ το με "Χειροκίνητες Ρυθμίσεις Υπολοίπου" για το προηγούμενο έτος πριν ενεργοποιήσεις τη μεταφορά.') }}</p>
+            <p>{{ __('Οι υπάλληλοι βλέπουν τις μέρες αυτές σε ξεχωριστή κάρτα στον Πίνακα Ελέγχου τους, με την ημερομηνία λήξης. Όταν υποβάλλουν άδεια, χρησιμοποιούνται πρώτα οι περσινές μέρες, και μια αίτηση μπορεί να μοιραστεί ανάμεσα στα δύο έτη.') }}</p>
         </div>
     </x-filament::section>
 

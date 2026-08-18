@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Tenancy\EditCompanySettings;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeamId;
 use App\Models\Tenant;
@@ -31,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->tenant(Tenant::class, slugAttribute: 'slug')
+            ->tenantProfile(EditCompanySettings::class)
             ->login()
             ->passwordReset()
             ->profile(isSimple: false)

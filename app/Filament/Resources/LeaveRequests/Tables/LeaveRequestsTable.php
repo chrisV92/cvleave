@@ -108,7 +108,7 @@ class LeaveRequestsTable
                                     'name' => $record->user->name,
                                     'type' => $record->leaveType->name,
                                     'year' => $year,
-                                    'remaining' => $service->remainingDays($record->user, $record->leaveType, $year, excludeLeaveRequestId: $record->getKey()),
+                                    'remaining' => $service->availableFor($record->user, $record->leaveType, $record->start_date, excludeLeaveRequestId: $record->getKey()),
                                     'requested' => $record->days_count,
                                 ]))
                                 ->danger()
@@ -117,7 +117,20 @@ class LeaveRequestsTable
                             return;
                         }
 
-                        $record->update(['status' => LeaveRequest::STATUS_APPROVED]);
+                        // Recompute the carry-over split here rather than trust
+                        // what was worked out when the request was submitted —
+                        // the available balance can move while it sits pending.
+                        $record->update([
+                            'status' => LeaveRequest::STATUS_APPROVED,
+                            'days_from_carryover' => $service->allocateFromCarryover(
+                                $record->user,
+                                $record->leaveType,
+                                $record->start_date,
+                                (float) $record->days_count,
+                                excludeLeaveRequestId: $record->getKey(),
+                            ),
+                        ]);
+
                         Notification::make()->title(__('Η αίτηση εγκρίθηκε'))->success()->send();
                     }),
                 Action::make('reject')

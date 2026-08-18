@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\User;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class LeaveBalanceService
 {
@@ -63,7 +66,7 @@ class LeaveBalanceService
      * "Total career seniority" includes declared prior experience at other
      * employers (users.prior_experience_years) — not just this employer.
      */
-    public function greekLawEntitledDays(User $user, \DateTimeInterface $asOf): float
+    public function greekLawEntitledDays(User $user, DateTimeInterface $asOf): float
     {
         if (! $user->hire_date) {
             return 0;
@@ -108,12 +111,18 @@ class LeaveBalanceService
      */
     public function usedDays(User $user, LeaveType $leaveType, int $year, ?int $excludeLeaveRequestId = null): float
     {
-        return (float) $user->leaveRequests()
-            ->where('leave_type_id', $leaveType->id)
-            ->where('status', LeaveRequest::STATUS_APPROVED)
+        // Days taken during $year that came out of $year's own entitlement...
+        $ownYear = (float) $this->approvedRequests($user, $leaveType, $excludeLeaveRequestId)
             ->whereYear('start_date', $year)
-            ->when($excludeLeaveRequestId, fn ($query) => $query->whereKeyNot($excludeLeaveRequestId))
-            ->sum('days_count');
+            ->sum(DB::raw('days_count - days_from_carryover'));
+
+        // ...plus days taken early in the following year that were drawn back
+        // from what was left of $year.
+        $carriedForward = (float) $this->approvedRequests($user, $leaveType, $excludeLeaveRequestId)
+            ->whereYear('start_date', $year + 1)
+            ->sum('days_from_carryover');
+
+        return $ownYear + $carriedForward;
     }
 
     public function remainingDays(User $user, LeaveType $leaveType, int $year, ?int $excludeLeaveRequestId = null): float
@@ -123,22 +132,77 @@ class LeaveBalanceService
     }
 
     /**
-     * Whether approving this request would push the employee past their
-     * entitlement. Submitting a request only checks the balance against
-     * already-approved leave, so two requests that each fit on their own can
-     * still overdraw the balance once both are approved — this is the guard
-     * for that moment.
+     * Leftover days from the previous year that can still be used on $asOf,
+     * i.e. only while the company's carry-over deadline has not passed and the
+     * leave type is one that carries over at all.
+     */
+    public function carryoverAvailable(User $user, LeaveType $leaveType, DateTimeInterface|string $asOf, ?int $excludeLeaveRequestId = null): float
+    {
+        if (! $leaveType->allows_carryover) {
+            return 0;
+        }
+
+        $asOf = Carbon::parse($asOf);
+        $deadline = $user->tenant?->carryoverDeadlineFor($asOf->year);
+
+        if (! $deadline || $asOf->greaterThan($deadline)) {
+            return 0;
+        }
+
+        return max(0, $this->remainingDays($user, $leaveType, $asOf->year - 1, $excludeLeaveRequestId));
+    }
+
+    /**
+     * The whole pool a request starting on $startDate may draw from: whatever
+     * is left of the previous year (while still in time) plus this year's own
+     * remaining entitlement.
+     */
+    public function availableFor(User $user, LeaveType $leaveType, DateTimeInterface|string $startDate, ?int $excludeLeaveRequestId = null): float
+    {
+        $startDate = Carbon::parse($startDate);
+
+        return $this->carryoverAvailable($user, $leaveType, $startDate, $excludeLeaveRequestId)
+            + max(0, $this->remainingDays($user, $leaveType, $startDate->year, $excludeLeaveRequestId));
+    }
+
+    /**
+     * How much of a $days request should be charged to the previous year.
+     * Carried-over days are spent first because they are the ones that expire.
+     */
+    public function allocateFromCarryover(User $user, LeaveType $leaveType, DateTimeInterface|string $startDate, float $days, ?int $excludeLeaveRequestId = null): float
+    {
+        $carryover = $this->carryoverAvailable($user, $leaveType, $startDate, $excludeLeaveRequestId);
+
+        return round(min($days, $carryover), 3);
+    }
+
+    /**
+     * Whether approving this request would push the employee past what they
+     * have available. Submitting a request only checks against already-approved
+     * leave, so two requests that each fit on their own can still overdraw the
+     * balance once both are approved — this is the guard for that moment.
      */
     public function approvalWouldExceedBalance(LeaveRequest $leaveRequest): bool
     {
-        $remaining = $this->remainingDays(
+        $available = $this->availableFor(
             $leaveRequest->user,
             $leaveRequest->leaveType,
-            Carbon::parse($leaveRequest->start_date)->year,
+            $leaveRequest->start_date,
             excludeLeaveRequestId: $leaveRequest->getKey(),
         );
 
-        return (float) $leaveRequest->days_count > $remaining;
+        return (float) $leaveRequest->days_count > $available;
+    }
+
+    /**
+     * @return HasMany<LeaveRequest, User>
+     */
+    private function approvedRequests(User $user, LeaveType $leaveType, ?int $excludeLeaveRequestId)
+    {
+        return $user->leaveRequests()
+            ->where('leave_type_id', $leaveType->id)
+            ->where('status', LeaveRequest::STATUS_APPROVED)
+            ->when($excludeLeaveRequestId, fn ($query) => $query->whereKeyNot($excludeLeaveRequestId));
     }
 
     /**
@@ -146,7 +210,11 @@ class LeaveBalanceService
      * constant number of queries (not one pair of queries per leave type) —
      * used by the dashboard "My Leave Balances" widget.
      *
-     * @return Collection<int, object{leaveType: LeaveType, entitled: float, used: float, remaining: float}>
+     * Carried-over days from the previous year are reported separately rather
+     * than folded into the total, so an employee can see which days are about
+     * to expire.
+     *
+     * @return Collection<int, object{leaveType: LeaveType, entitled: float, used: float, remaining: float, carryoverRemaining: float, carryoverEntitled: float, carryoverExpiresAt: ?Carbon}>
      */
     public function summaryForUser(User $user, int $year): Collection
     {
@@ -156,48 +224,91 @@ class LeaveBalanceService
             ->with('accrualRules')
             ->get();
 
-        $overrides = $user->leaveBalances()
-            ->where('year', $year)
-            ->pluck('manual_override_days', 'leave_type_id');
+        $overrides = [];
+        foreach ($user->leaveBalances()->whereIn('year', [$year - 1, $year])->get() as $balance) {
+            $overrides[$balance->year][$balance->leave_type_id] = $balance->manual_override_days;
+        }
 
-        $usedByType = $user->leaveRequests()
+        // One grouped query covering the previous, current and next year, so
+        // the carry-over figures cost no extra queries per leave type.
+        $totals = [];
+        $rows = $user->leaveRequests()
             ->where('status', LeaveRequest::STATUS_APPROVED)
-            ->whereYear('start_date', $year)
-            ->selectRaw('leave_type_id, SUM(days_count) as total')
-            ->groupBy('leave_type_id')
-            ->pluck('total', 'leave_type_id');
+            ->whereBetween('start_date', [
+                Carbon::create($year - 1, 1, 1)->startOfDay(),
+                Carbon::create($year + 1, 12, 31)->endOfDay(),
+            ])
+            ->selectRaw('leave_type_id, YEAR(start_date) as year_bucket, SUM(days_count - days_from_carryover) as own_days, SUM(days_from_carryover) as carried_days')
+            ->groupBy('leave_type_id', 'year_bucket')
+            ->get();
 
-        $asOf = now()->setYear($year)->endOfYear();
-        $yearsOfService = $user->yearsOfService($asOf);
+        foreach ($rows as $row) {
+            $totals[$row->leave_type_id][(int) $row->year_bucket] = [
+                'own' => (float) $row->own_days,
+                'carried' => (float) $row->carried_days,
+            ];
+        }
 
-        return $leaveTypes->map(function (LeaveType $leaveType) use ($user, $asOf, $yearsOfService, $overrides, $usedByType) {
-            $override = $overrides->get($leaveType->id);
+        $usedIn = fn (int $leaveTypeId, int $bucketYear): float => ($totals[$leaveTypeId][$bucketYear]['own'] ?? 0)
+            + ($totals[$leaveTypeId][$bucketYear + 1]['carried'] ?? 0);
 
-            if ($override !== null) {
-                $entitled = (float) $override;
-            } elseif ($leaveType->auto_calculate && $leaveType->use_greek_law_formula) {
-                $entitled = $this->greekLawEntitledDays($user, $asOf);
-            } elseif ($leaveType->auto_calculate) {
-                $rule = $leaveType->accrualRules
-                    ->filter(fn ($rule) => $rule->min_years_service <= $yearsOfService
-                        && ($rule->max_years_service === null || $rule->max_years_service >= $yearsOfService))
-                    ->sortByDesc('min_years_service')
-                    ->first();
+        $deadline = $user->tenant?->carryoverDeadlineFor($year);
+        $carryoverStillOpen = $deadline && now()->lessThanOrEqualTo($deadline);
 
-                $entitled = $rule ? (float) $rule->days_per_year : (float) ($leaveType->fixed_days_per_year ?? 0);
-            } else {
-                $entitled = (float) ($leaveType->fixed_days_per_year ?? 0);
+        return $leaveTypes->map(function (LeaveType $leaveType) use ($user, $year, $overrides, $usedIn, $deadline, $carryoverStillOpen) {
+            $entitled = $this->entitlementFor($user, $leaveType, $year, $overrides[$year][$leaveType->id] ?? null);
+            $used = $usedIn($leaveType->id, $year);
+
+            $carryoverEntitled = 0.0;
+            $carryoverRemaining = 0.0;
+
+            if ($carryoverStillOpen && $leaveType->allows_carryover) {
+                $carryoverEntitled = $this->entitlementFor($user, $leaveType, $year - 1, $overrides[$year - 1][$leaveType->id] ?? null);
+                $carryoverRemaining = max(0, $carryoverEntitled - $usedIn($leaveType->id, $year - 1));
             }
-
-            $used = (float) $usedByType->get($leaveType->id, 0);
 
             return (object) [
                 'leaveType' => $leaveType,
                 'entitled' => $entitled,
                 'used' => $used,
                 'remaining' => $entitled - $used,
+                'carryoverEntitled' => $carryoverEntitled,
+                'carryoverRemaining' => $carryoverRemaining,
+                'carryoverExpiresAt' => $carryoverRemaining > 0 ? $deadline : null,
             ];
         });
+    }
+
+    /**
+     * Entitlement for one leave type/year from already-loaded data — shared by
+     * the current-year and previous-year (carry-over) figures so both follow
+     * exactly the same rules.
+     */
+    private function entitlementFor(User $user, LeaveType $leaveType, int $year, float|int|string|null $override): float
+    {
+        if ($override !== null) {
+            return (float) $override;
+        }
+
+        $asOf = now()->setYear($year)->endOfYear();
+
+        if ($leaveType->auto_calculate && $leaveType->use_greek_law_formula) {
+            return $this->greekLawEntitledDays($user, $asOf);
+        }
+
+        if ($leaveType->auto_calculate) {
+            $yearsOfService = $user->yearsOfService($asOf);
+
+            $rule = $leaveType->accrualRules
+                ->filter(fn ($rule) => $rule->min_years_service <= $yearsOfService
+                    && ($rule->max_years_service === null || $rule->max_years_service >= $yearsOfService))
+                ->sortByDesc('min_years_service')
+                ->first();
+
+            return $rule ? (float) $rule->days_per_year : (float) ($leaveType->fixed_days_per_year ?? 0);
+        }
+
+        return (float) ($leaveType->fixed_days_per_year ?? 0);
     }
 
     /**
@@ -205,7 +316,7 @@ class LeaveBalanceService
      * request for the same user (inclusive — a leave ending on day X blocks a
      * new leave from starting on that same day X).
      */
-    public function hasOverlap(User $user, \DateTimeInterface|string $start, \DateTimeInterface|string $end, ?int $excludeLeaveRequestId = null): bool
+    public function hasOverlap(User $user, DateTimeInterface|string $start, DateTimeInterface|string $end, ?int $excludeLeaveRequestId = null): bool
     {
         $start = Carbon::parse($start);
         $end = Carbon::parse($end);
@@ -221,7 +332,7 @@ class LeaveBalanceService
     /**
      * Business-day count between two dates (inclusive), excluding weekends.
      */
-    public function countBusinessDays(\DateTimeInterface $start, \DateTimeInterface $end): int
+    public function countBusinessDays(DateTimeInterface $start, DateTimeInterface $end): int
     {
         $period = new \DatePeriod(
             \DateTime::createFromInterface($start),

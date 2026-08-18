@@ -64,10 +64,46 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   accountant/lawyer before being relied on for real payroll decisions, and
   edge cases (six-day work week, part-time, parental leave, etc.) aren't
   covered yet.
-- **Leave spanning a year boundary** — `LeaveBalanceService::usedDays()` buckets
-  a request by `start_date`'s year, so leave running e.g. 28 Dec – 5 Jan is
-  charged entirely to the starting year rather than split across both. Fine for
-  current use, but worth deciding deliberately before this is sold.
+- **Year-boundary leave accounting / carry-over** — two related gaps, both
+  currently unhandled:
+
+  1. *A request spanning the year boundary.* `LeaveBalanceService::usedDays()`
+     buckets a request by `start_date`'s year, so leave running 28 Dec – 5 Jan
+     is charged entirely to the starting year instead of being split.
+  2. *Carry-over into the next year.* Greek practice appears to allow leave
+     accrued in one year to still be taken early in the next (commonly cited
+     as up to 31 March). Today the app has no concept of this at all: a
+     January request is charged against the **new** year's entitlement, so
+     last year's unused days are silently lost, and there is no deadline
+     after which they expire.
+
+  **⚠️ Confirm the legal rule first.** Whether the carry-over is automatic,
+  whether it truly expires 31 March, whether the employer is obliged to grant
+  it by then, and what happens to days never taken (payout, surcharge) all
+  change the design. This needs the same accountant/lawyer review as the
+  accrual formula above — building to a guessed rule would be worse than not
+  building it.
+
+  **Design options considered:**
+  - *A `charged_year` column on `leave_requests`* (recommended). Defaults to
+    `start_date`'s year; a Jan–Mar request may instead be charged to the
+    previous year while that balance lasts. `usedDays()` then sums on
+    `charged_year` rather than `whereYear('start_date')`. Small migration,
+    keeps the accounting explicit and auditable ("which year did this come
+    out of?"), makes the March deadline a validation rule on selectable
+    values rather than hidden arithmetic, and also fixes case 1 — a
+    boundary-spanning request is either charged to one year deliberately or
+    split into two rows.
+  - *Implicit carry-over inside the balance calculation.* No schema change,
+    but the consumption order (old balance first) becomes invisible, and
+    reporting "how many 2026 days are left" gets murky.
+  - *A dedicated `leave_carryovers` ledger* (user, leave type, from year,
+    days, expires at). Most correct and supports expiry cleanly, but needs a
+    year-end process and is the heaviest option.
+
+  Whichever is chosen, the dashboard balance cards need to show carried-over
+  days and their expiry separately, otherwise employees cannot tell which
+  days they are about to lose.
 - **Onboarding flow** — self-serve company signup, not admin-provisioned users.
 - **Production hosting** — this currently runs on a home server over
   Tailscale; a public product needs real infrastructure, backups, uptime.

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\LeaveRequestReviewed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,12 +12,17 @@ class LeaveRequest extends Model
     use HasFactory;
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_REJECTED = 'rejected';
+
     const STATUS_CANCELLED = 'cancelled';
 
     const DURATION_FULL_DAY = 'full_day';
+
     const DURATION_HALF_DAY = 'half_day';
+
     const DURATION_HOURS = 'hours';
 
     protected $fillable = [
@@ -71,7 +77,7 @@ class LeaveRequest extends Model
 
         static::saved(function (self $leaveRequest) {
             if ($leaveRequest->wasChanged('status') && in_array($leaveRequest->status, [self::STATUS_APPROVED, self::STATUS_REJECTED], true)) {
-                $leaveRequest->user->notify(new \App\Notifications\LeaveRequestReviewed($leaveRequest));
+                $leaveRequest->user->notify(new LeaveRequestReviewed($leaveRequest));
             }
         });
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeaveType extends Model
@@ -11,6 +12,7 @@ class LeaveType extends Model
     use HasFactory;
 
     protected $fillable = [
+        'tenant_id',
         'name',
         'color',
         'requires_note',
@@ -28,6 +30,11 @@ class LeaveType extends Model
             'use_greek_law_formula' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function accrualRules(): HasMany

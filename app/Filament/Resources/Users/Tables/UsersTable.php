@@ -24,13 +24,13 @@ class UsersTable
                 TextColumn::make('email')
                     ->label(__('Διεύθυνση Email'))
                     ->searchable(),
-                BadgeColumn::make('role')
+                BadgeColumn::make('roles.name')
                     ->label(__('Ρόλος'))
                     ->colors([
                         'primary' => 'admin',
                         'gray' => 'employee',
                     ])
-                    ->formatStateUsing(fn (string $state) => match ($state) {
+                    ->formatStateUsing(fn (?string $state) => match ($state) {
                         'admin' => __('Admin'),
                         'employee' => __('Υπάλληλος'),
                         default => $state,

@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /*
@@ -51,11 +55,27 @@ expect()->extend('toBeOne', function () {
  * A non-persisted User instance for pure-computation unit tests
  * (e.g. the Greek annual leave formula) that don't need the database.
  */
-function unpersistedUser(?string $hireDate, float $priorYears = 0): \App\Models\User
+function unpersistedUser(?string $hireDate, float $priorYears = 0): User
 {
-    $user = new \App\Models\User();
-    $user->hire_date = $hireDate ? \Illuminate\Support\Carbon::parse($hireDate) : null;
+    $user = new User;
+    $user->hire_date = $hireDate ? Carbon::parse($hireDate) : null;
     $user->prior_experience_years = $priorYears;
+
+    return $user;
+}
+
+/**
+ * Logs in as $user and establishes the Filament tenant + Spatie permissions team
+ * context for their tenant, mirroring what the SetPermissionsTeamId middleware
+ * does on a real request. Needed by any Feature test that hits a tenant-scoped
+ * Filament panel resource/page directly via Livewire::test().
+ */
+function actingInTenant(User $user): User
+{
+    test()->actingAs($user);
+
+    Filament::setTenant($user->tenant, isQuiet: true);
+    app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
 
     return $user;
 }

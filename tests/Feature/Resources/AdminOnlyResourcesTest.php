@@ -3,6 +3,7 @@
 use App\Filament\Resources\LeaveTypes\LeaveTypeResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 it('allows an admin to view the Users resource', function () {
     $admin = User::factory()->admin()->create();
@@ -37,7 +38,7 @@ it('forbids an employee from viewing the LeaveTypes resource', function () {
 });
 
 it('has no registration route in the admin panel', function () {
-    expect(\Illuminate\Support\Facades\Route::has('filament.admin.auth.register'))->toBeFalse();
+    expect(Route::has('filament.admin.auth.register'))->toBeFalse();
 });
 
 it('redirects a guest hitting the admin panel to the login page', function () {

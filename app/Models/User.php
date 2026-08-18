@@ -5,23 +5,25 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'role', 'hire_date', 'prior_experience_years'])]
+#[Fillable(['name', 'email', 'password', 'tenant_id', 'hire_date', 'prior_experience_years', 'is_platform_admin'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasTenants
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
-
-    const ROLE_ADMIN = 'admin';
-    const ROLE_EMPLOYEE = 'employee';
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -35,17 +37,37 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'hire_date' => 'date',
             'prior_experience_years' => 'float',
+            'is_platform_admin' => 'boolean',
         ];
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->hasRole('admin');
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($panel->getId() === 'platform') {
+            return (bool) $this->is_platform_admin;
+        }
+
         return true;
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function getTenants(Panel $panel): Collection
+    {
+        return $this->tenant ? collect([$this->tenant]) : collect();
+    }
+
+    public function canAccessTenant(Model $tenant): bool
+    {
+        return $this->tenant_id === $tenant->id;
     }
 
     public function leaveRequests(): HasMany

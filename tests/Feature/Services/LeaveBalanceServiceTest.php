@@ -2,11 +2,12 @@
 
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Services\LeaveBalanceService;
 
 beforeEach(function () {
-    $this->service = new LeaveBalanceService();
+    $this->service = new LeaveBalanceService;
 });
 
 it('uses the manual override when one is set, ignoring auto-calculation entirely', function () {
@@ -139,4 +140,22 @@ it('counts business days inclusively, excluding weekends', function () {
         new DateTime('2026-08-22'),
         new DateTime('2026-08-22')
     ))->toBe(0);
+});
+
+it('only summarizes leave types belonging to the user\'s own tenant', function () {
+    $tenantA = Tenant::factory()->create();
+    $tenantB = Tenant::factory()->create();
+
+    $user = User::factory()->for($tenantA)->create();
+    LeaveType::factory()->for($tenantA)->create(['is_active' => true, 'name' => 'Tenant A Type']);
+    LeaveType::factory()->for($tenantB)->create(['is_active' => true, 'name' => 'Tenant B Type']);
+
+    $summary = $this->service->summaryForUser($user, now()->year);
+    $names = $summary->pluck('leaveType.name');
+
+    // Tenant::factory() auto-seeds 3 default leave types on creation, so tenant A
+    // ends up with those plus the explicit one created above — never tenant B's.
+    expect($names)->toContain('Tenant A Type')
+        ->and($names)->not->toContain('Tenant B Type')
+        ->and($summary->pluck('leaveType.tenant_id')->unique()->all())->toBe([$tenantA->id]);
 });

@@ -13,9 +13,7 @@ class LeaveEndingSoon extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public LeaveRequest $leaveRequest, public bool $forAdmin = false)
-    {
-    }
+    public function __construct(public LeaveRequest $leaveRequest, public bool $forAdmin = false) {}
 
     public function via(object $notifiable): array
     {

@@ -6,7 +6,6 @@ use App\Models\LeaveRequest;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Str;
 
 class LeaveRequestExporter extends Exporter
 {
@@ -62,7 +61,7 @@ class LeaveRequestExporter extends Exporter
         $body = __(':count αιτήσεις εξήχθησαν επιτυχώς.', ['count' => $export->successful_rows]);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . __(':count απέτυχαν.', ['count' => $failedRowsCount]);
+            $body .= ' '.__(':count απέτυχαν.', ['count' => $failedRowsCount]);
         }
 
         return $body;

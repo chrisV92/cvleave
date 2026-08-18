@@ -24,8 +24,18 @@ price/simplicity for the Greek market specifically, not on feature breadth.
 
 ## What's missing before it could actually be sold
 
-- **Multi-tenancy** — currently single-company (one set of users/leave types).
-  Would need a `companies`/`tenants` table and scoping on every model.
+- **Multi-tenancy** — Phase 1 done: `tenants` table, `spatie/laravel-permission`
+  (teams feature, `tenant_id` as the team key) replacing the old `role` column,
+  Filament panel wired with `->tenant(Tenant::class)`, `LeaveType`/`User`
+  scoped per tenant with default leave types + admin/employee roles seeded
+  automatically on tenant creation. Phase 2 done: a separate `platform` Filament
+  panel (`/platform`, no tenant scoping) for the SaaS owner, gated by a plain
+  `is_platform_admin` flag on `users` (independent of the tenant-scoped Spatie
+  roles), with `Tenants` and cross-tenant `Users` resources. Still missing:
+  self-service tenant registration/invite flow, granular permissions beyond
+  admin/employee, tenant-scoping on exports (`LeaveRequestExporter`) and the
+  all-employees PDF report route, and a global/cross-tenant LeaveRequests view
+  in the platform panel.
 - **Billing** — Stripe/subscription integration, plan limits, trial handling.
 - **Legal validation** — the Greek-law formula should be reviewed by an
   accountant/lawyer before being relied on for real payroll decisions, and

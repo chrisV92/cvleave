@@ -9,6 +9,7 @@ use App\Filament\Resources\LeaveRequests\Schemas\LeaveRequestForm;
 use App\Filament\Resources\LeaveRequests\Tables\LeaveRequestsTable;
 use App\Models\LeaveRequest;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +22,13 @@ class LeaveRequestResource extends Resource
     protected static ?string $model = LeaveRequest::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    /**
+     * LeaveRequest has no direct tenant relationship — it's scoped to the
+     * current tenant indirectly through its `user` in getEloquentQuery()
+     * below, so Filament's automatic tenant-ownership scoping is disabled.
+     */
+    protected static bool $isScopedToTenant = false;
 
     public static function getNavigationLabel(): string
     {
@@ -39,7 +47,8 @@ class LeaveRequestResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->whereHas('user', fn (Builder $query) => $query->where('tenant_id', Filament::getTenant()?->id));
 
         if (! (auth()->user()?->isAdmin() ?? false)) {
             $query->where('user_id', auth()->id());

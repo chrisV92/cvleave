@@ -31,7 +31,7 @@ class LeaveReportController extends Controller
             'generatedAt' => now(),
         ])->setPaper('a4');
 
-        $filename = 'leave-report-' . str($user->name)->slug() . '-' . $year . '.pdf';
+        $filename = 'leave-report-'.str($user->name)->slug().'-'.$year.'.pdf';
 
         return $pdf->download($filename);
     }
@@ -52,6 +52,6 @@ class LeaveReportController extends Controller
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('leave-report-all-employees-' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('leave-report-all-employees-'.now()->format('Y-m-d').'.pdf');
     }
 }

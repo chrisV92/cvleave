@@ -17,6 +17,7 @@ class LeaveCalendar extends FullCalendarWidget
 
         $query = LeaveRequest::query()
             ->with(['leaveType', 'user'])
+            ->whereHas('user', fn ($query) => $query->where('tenant_id', auth()->user()?->tenant_id))
             ->whereIn('status', [LeaveRequest::STATUS_PENDING, LeaveRequest::STATUS_APPROVED])
             ->where('start_date', '<=', $info['end'])
             ->where('end_date', '>=', $info['start']);
@@ -25,24 +26,26 @@ class LeaveCalendar extends FullCalendarWidget
             $query->where('user_id', auth()->id());
         }
 
-        return $query->get()->map(function (LeaveRequest $leaveRequest) use ($isAdmin) {
-            $title = $isAdmin
-                ? "{$leaveRequest->user->name} — {$leaveRequest->leaveType->name}"
-                : $leaveRequest->leaveType->name;
+        return $query->get()
+            ->filter(fn (LeaveRequest $leaveRequest) => $leaveRequest->user && $leaveRequest->leaveType)
+            ->map(function (LeaveRequest $leaveRequest) use ($isAdmin) {
+                $title = $isAdmin
+                    ? "{$leaveRequest->user->name} — {$leaveRequest->leaveType->name}"
+                    : $leaveRequest->leaveType->name;
 
-            if ($leaveRequest->status === LeaveRequest::STATUS_PENDING) {
-                $title .= ' ('.__('εκκρεμεί').')';
-            }
+                if ($leaveRequest->status === LeaveRequest::STATUS_PENDING) {
+                    $title .= ' ('.__('εκκρεμεί').')';
+                }
 
-            return [
-                'title' => $title,
-                'start' => $leaveRequest->start_date->toDateString(),
-                'end' => $leaveRequest->end_date->addDay()->toDateString(),
-                'color' => $leaveRequest->status === LeaveRequest::STATUS_PENDING
-                    ? '#94a3b8'
-                    : $leaveRequest->leaveType->color,
-            ];
-        })->toArray();
+                return [
+                    'title' => $title,
+                    'start' => $leaveRequest->start_date->toDateString(),
+                    'end' => $leaveRequest->end_date->addDay()->toDateString(),
+                    'color' => $leaveRequest->status === LeaveRequest::STATUS_PENDING
+                        ? '#94a3b8'
+                        : $leaveRequest->leaveType->color,
+                ];
+            })->values()->toArray();
     }
 
     protected function headerActions(): array

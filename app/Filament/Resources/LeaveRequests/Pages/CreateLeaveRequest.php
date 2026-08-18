@@ -10,6 +10,7 @@ use App\Notifications\LeaveRequestSubmitted;
 use App\Services\LeaveBalanceService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Carbon;
 
 class CreateLeaveRequest extends CreateRecord
 {
@@ -34,7 +35,7 @@ class CreateLeaveRequest extends CreateRecord
 
         $user = User::find($data['user_id'] ?? auth()->id());
         $leaveType = LeaveType::find($data['leave_type_id']);
-        $year = \Illuminate\Support\Carbon::parse($data['start_date'])->year;
+        $year = Carbon::parse($data['start_date'])->year;
 
         $service = app(LeaveBalanceService::class);
 
@@ -69,7 +70,7 @@ class CreateLeaveRequest extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $admins = User::where('role', User::ROLE_ADMIN)->get();
+        $admins = User::role('admin')->get();
 
         foreach ($admins as $admin) {
             $admin->notify(new LeaveRequestSubmitted($this->record));

@@ -9,6 +9,7 @@ use App\Services\LeaveBalanceService;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Carbon;
 
 class EditLeaveRequest extends EditRecord
 {
@@ -42,7 +43,7 @@ class EditLeaveRequest extends EditRecord
         $data = $this->form->getState();
 
         $leaveType = LeaveType::find($data['leave_type_id']);
-        $year = \Illuminate\Support\Carbon::parse($data['start_date'])->year;
+        $year = Carbon::parse($data['start_date'])->year;
 
         $service = app(LeaveBalanceService::class);
 

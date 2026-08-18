@@ -29,7 +29,13 @@ class UserForm
                         'employee' => __('Υπάλληλος'),
                     ])
                     ->required()
-                    ->default('employee'),
+                    ->default('employee')
+                    ->dehydrated()
+                    ->afterStateHydrated(function ($component, $record) {
+                        if ($record) {
+                            $component->state($record->getRoleNames()->first());
+                        }
+                    }),
                 DatePicker::make('hire_date')
                     ->label(__('Ημερομηνία πρόσληψης')),
                 TextInput::make('prior_experience_years')

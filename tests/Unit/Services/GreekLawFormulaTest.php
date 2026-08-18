@@ -3,7 +3,7 @@
 use App\Services\LeaveBalanceService;
 
 beforeEach(function () {
-    $this->service = new LeaveBalanceService();
+    $this->service = new LeaveBalanceService;
 });
 
 it('returns 0 when the user has no hire date', function () {

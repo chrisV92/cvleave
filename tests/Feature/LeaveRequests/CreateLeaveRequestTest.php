@@ -3,12 +3,13 @@
 use App\Filament\Resources\LeaveRequests\Pages\CreateLeaveRequest;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\Tenant;
 use App\Models\User;
 use Livewire\Livewire;
 
 function submitLeaveRequest(User $as, array $data)
 {
-    test()->actingAs($as);
+    actingInTenant($as);
 
     $test = Livewire::test(CreateLeaveRequest::class);
 
@@ -20,8 +21,9 @@ function submitLeaveRequest(User $as, array $data)
 }
 
 it('lets an employee create a valid leave request for themselves', function () {
-    $employee = User::factory()->create(['hire_date' => now()->subYears(3)]);
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create(['hire_date' => now()->subYears(3)]);
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
 
     submitLeaveRequest($employee, [
         'leave_type_id' => $leaveType->id,
@@ -38,11 +40,12 @@ it('lets an employee create a valid leave request for themselves', function () {
 });
 
 it('forces status to pending and user_id to self for a non-admin, even if tampered with', function () {
-    $employee = User::factory()->create();
-    $otherUser = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $otherUser = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
 
-    test()->actingAs($employee);
+    actingInTenant($employee);
 
     $test = Livewire::test(CreateLeaveRequest::class);
     $test->set('data.leave_type_id', $leaveType->id);
@@ -60,8 +63,9 @@ it('forces status to pending and user_id to self for a non-admin, even if tamper
 });
 
 it('blocks a request that overlaps an existing pending or approved leave', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 30]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 30]);
 
     LeaveRequest::factory()->for($employee)->for($leaveType)->approved()->create([
         'start_date' => '2026-11-01',
@@ -80,8 +84,9 @@ it('blocks a request that overlaps an existing pending or approved leave', funct
 });
 
 it('allows a request starting the day after a previous leave ends', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 30]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 30]);
 
     LeaveRequest::factory()->for($employee)->for($leaveType)->approved()->create([
         'start_date' => '2026-11-01',
@@ -100,8 +105,9 @@ it('allows a request starting the day after a previous leave ends', function () 
 });
 
 it('blocks a request that exceeds the remaining day balance', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 5]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 5]);
 
     submitLeaveRequest($employee, [
         'leave_type_id' => $leaveType->id,
@@ -114,8 +120,9 @@ it('blocks a request that exceeds the remaining day balance', function () {
 });
 
 it('allows a request that exactly matches the remaining day balance', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 3]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 3]);
 
     submitLeaveRequest($employee, [
         'leave_type_id' => $leaveType->id,
@@ -128,8 +135,9 @@ it('allows a request that exactly matches the remaining day balance', function (
 });
 
 it('creates a half-day leave request with days_count 0.5', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
 
     submitLeaveRequest($employee, [
         'leave_type_id' => $leaveType->id,
@@ -146,8 +154,9 @@ it('creates a half-day leave request with days_count 0.5', function () {
 });
 
 it('creates an hours-based leave request with days_count as a fraction of an 8-hour day', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
 
     submitLeaveRequest($employee, [
         'leave_type_id' => $leaveType->id,
@@ -166,8 +175,9 @@ it('creates an hours-based leave request with days_count as a fraction of an 8-h
 });
 
 it('deducts an hours-based request correctly from the remaining balance', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 1]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 1]);
 
     // An already-approved 7-hour (0.875 day) request leaves 0.125 remaining —
     // a second 2-hour (0.25 day) request must be blocked.
@@ -192,10 +202,11 @@ it('deducts an hours-based request correctly from the remaining balance', functi
 });
 
 it('auto-computes days_count from hours via the live form fields, without it being set explicitly', function () {
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
 
-    test()->actingAs($employee);
+    actingInTenant($employee);
 
     Livewire::test(CreateLeaveRequest::class)
         ->set('data.leave_type_id', $leaveType->id)
@@ -212,9 +223,10 @@ it('auto-computes days_count from hours via the live form fields, without it bei
 });
 
 it('allows an admin to create a leave request on behalf of an employee with a chosen status', function () {
-    $admin = User::factory()->admin()->create();
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->for($tenant)->admin()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create(['auto_calculate' => false, 'fixed_days_per_year' => 20]);
 
     submitLeaveRequest($admin, [
         'user_id' => $employee->id,

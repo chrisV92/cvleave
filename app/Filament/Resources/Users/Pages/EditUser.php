@@ -10,10 +10,25 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected ?string $roleToAssign = null;
+
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $this->roleToAssign = $data['role'] ?? 'employee';
+        unset($data['role']);
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        $this->record->syncRoles([$this->roleToAssign]);
     }
 }

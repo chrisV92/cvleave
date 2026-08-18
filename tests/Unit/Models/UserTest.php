@@ -1,18 +1,5 @@
 <?php
 
-use App\Models\User;
-
-it('reports isAdmin correctly for each role', function () {
-    $admin = unpersistedUser(now()->toDateString());
-    $admin->role = User::ROLE_ADMIN;
-
-    $employee = unpersistedUser(now()->toDateString());
-    $employee->role = User::ROLE_EMPLOYEE;
-
-    expect($admin->isAdmin())->toBeTrue()
-        ->and($employee->isAdmin())->toBeFalse();
-});
-
 it('computes years of service as full completed years since hire_date', function () {
     $user = unpersistedUser(now()->subYears(4)->subMonths(2)->toDateString());
 

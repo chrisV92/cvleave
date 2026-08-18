@@ -2,6 +2,7 @@
 
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\LeaveEndingSoon;
 use App\Notifications\LeaveStartingSoon;
@@ -10,9 +11,10 @@ use Illuminate\Support\Facades\Notification;
 it('notifies the employee and all admins for leaves starting tomorrow', function () {
     Notification::fake();
 
-    $admin = User::factory()->admin()->create();
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create();
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->for($tenant)->admin()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create();
 
     $leaveRequest = LeaveRequest::factory()->for($employee)->for($leaveType)->approved()->create([
         'start_date' => now()->addDay(),
@@ -28,9 +30,10 @@ it('notifies the employee and all admins for leaves starting tomorrow', function
 it('notifies the employee and all admins for leaves ending tomorrow', function () {
     Notification::fake();
 
-    $admin = User::factory()->admin()->create();
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create();
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->for($tenant)->admin()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create();
 
     LeaveRequest::factory()->for($employee)->for($leaveType)->approved()->create([
         'start_date' => now()->subDays(4),
@@ -46,8 +49,9 @@ it('notifies the employee and all admins for leaves ending tomorrow', function (
 it('does not notify for leaves that are still pending', function () {
     Notification::fake();
 
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create();
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create();
 
     LeaveRequest::factory()->for($employee)->for($leaveType)->create([ // pending, not approved
         'start_date' => now()->addDay(),
@@ -62,8 +66,9 @@ it('does not notify for leaves that are still pending', function () {
 it('does not notify for leaves starting or ending further than tomorrow', function () {
     Notification::fake();
 
-    $employee = User::factory()->create();
-    $leaveType = LeaveType::factory()->create();
+    $tenant = Tenant::factory()->create();
+    $employee = User::factory()->for($tenant)->create();
+    $leaveType = LeaveType::factory()->for($tenant)->create();
 
     LeaveRequest::factory()->for($employee)->for($leaveType)->approved()->create([
         'start_date' => now()->addDays(5),

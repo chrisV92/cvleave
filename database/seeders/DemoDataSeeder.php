@@ -4,14 +4,23 @@ namespace Database\Seeders;
 
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\PermissionRegistrar;
 
 class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        $tenant = Tenant::firstOrCreate(
+            ['slug' => 'default'],
+            ['name' => 'Default']
+        );
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+
         $employees = [
             ['name' => 'Μαρία Παπαδοπούλου', 'email' => 'maria@cvleave.dev.com', 'hire_date' => now()->subMonths(4)],
             ['name' => 'Γιώργος Νικολάου', 'email' => 'giorgos@cvleave.dev.com', 'hire_date' => now()->subYears(5)],
@@ -19,21 +28,27 @@ class DemoDataSeeder extends Seeder
             ['name' => 'Δημήτρης Αντωνίου', 'email' => 'dimitris@cvleave.dev.com', 'hire_date' => now()->subYears(27)],
         ];
 
-        $users = collect($employees)->map(function ($data) {
-            return User::updateOrCreate(
+        $users = collect($employees)->map(function ($data) use ($tenant) {
+            $user = User::updateOrCreate(
                 ['email' => $data['email']],
                 [
+                    'tenant_id' => $tenant->id,
                     'name' => $data['name'],
                     'password' => Hash::make('password'),
-                    'role' => User::ROLE_EMPLOYEE,
                     'hire_date' => $data['hire_date'],
                 ]
             );
+
+            if (! $user->hasAnyRole(['admin', 'employee'])) {
+                $user->assignRole('employee');
+            }
+
+            return $user;
         });
 
-        $annual = LeaveType::where('name', 'Κανονική Άδεια')->first();
-        $sick = LeaveType::where('name', 'Αναρρωτική Άδεια')->first();
-        $admin = User::where('role', User::ROLE_ADMIN)->first();
+        $annual = LeaveType::where('tenant_id', $tenant->id)->where('name', 'Κανονική Άδεια')->first();
+        $sick = LeaveType::where('tenant_id', $tenant->id)->where('name', 'Αναρρωτική Άδεια')->first();
+        $admin = User::role('admin')->where('tenant_id', $tenant->id)->first();
 
         // Μαρία: pending request starting soon
         LeaveRequest::updateOrCreate(
@@ -54,7 +69,7 @@ class DemoDataSeeder extends Seeder
                 'end_date' => now()->addDays(2),
                 'days_count' => 4,
                 'status' => LeaveRequest::STATUS_APPROVED,
-                'reviewed_by' => $admin->id,
+                'reviewed_by' => $admin?->id,
                 'reviewed_at' => now(),
             ]
         );
@@ -67,7 +82,7 @@ class DemoDataSeeder extends Seeder
                 'end_date' => now()->addDay(),
                 'days_count' => 5,
                 'status' => LeaveRequest::STATUS_APPROVED,
-                'reviewed_by' => $admin->id,
+                'reviewed_by' => $admin?->id,
                 'reviewed_at' => now(),
             ]
         );
@@ -82,7 +97,7 @@ class DemoDataSeeder extends Seeder
                 'status' => LeaveRequest::STATUS_REJECTED,
                 'note' => 'Ίωση, ελαφρύ πυρετό.',
                 'rejection_reason' => 'Δεν είχε προσκομιστεί ιατρική βεβαίωση.',
-                'reviewed_by' => $admin->id,
+                'reviewed_by' => $admin?->id,
                 'reviewed_at' => now(),
             ]
         );
@@ -95,11 +110,11 @@ class DemoDataSeeder extends Seeder
                 'end_date' => now()->addDays(6),
                 'days_count' => 6,
                 'status' => LeaveRequest::STATUS_APPROVED,
-                'reviewed_by' => $admin->id,
+                'reviewed_by' => $admin?->id,
                 'reviewed_at' => now(),
             ]
         );
 
-        $this->command->info('Created ' . $users->count() . ' employees with sample leave requests.');
+        $this->command->info('Created '.$users->count().' employees with sample leave requests.');
     }
 }

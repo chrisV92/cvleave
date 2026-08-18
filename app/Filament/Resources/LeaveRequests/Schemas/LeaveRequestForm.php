@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LeaveRequests\Schemas;
 
 use App\Models\LeaveType;
 use App\Services\LeaveBalanceService;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -21,14 +22,14 @@ class LeaveRequestForm
             ->components([
                 Select::make('user_id')
                     ->label(__('Υπάλληλος'))
-                    ->relationship('user', 'name')
+                    ->relationship('user', 'name', fn ($query) => $query->where('tenant_id', Filament::getTenant()?->id))
                     ->required()
                     ->visible($isAdmin)
                     ->default(fn () => auth()->id()),
 
                 Select::make('leave_type_id')
                     ->label(__('Τύπος άδειας'))
-                    ->relationship('leaveType', 'name', fn ($query) => $query->where('is_active', true))
+                    ->relationship('leaveType', 'name', fn ($query) => $query->where('is_active', true)->where('tenant_id', Filament::getTenant()?->id))
                     ->required()
                     ->live(),
 

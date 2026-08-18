@@ -14,9 +14,7 @@ class LeaveRequestSubmitted extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public LeaveRequest $leaveRequest)
-    {
-    }
+    public function __construct(public LeaveRequest $leaveRequest) {}
 
     public function via(object $notifiable): array
     {

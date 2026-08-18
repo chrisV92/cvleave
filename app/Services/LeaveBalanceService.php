@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class LeaveBalanceService
 {
@@ -67,7 +69,7 @@ class LeaveBalanceService
             return 0;
         }
 
-        $asOf = \Illuminate\Support\Carbon::parse($asOf);
+        $asOf = Carbon::parse($asOf);
         $hireDate = $user->hire_date;
 
         if ($asOf->lessThan($hireDate)) {
@@ -119,11 +121,12 @@ class LeaveBalanceService
      * constant number of queries (not one pair of queries per leave type) —
      * used by the dashboard "My Leave Balances" widget.
      *
-     * @return \Illuminate\Support\Collection<int, object{leaveType: LeaveType, entitled: float, used: float, remaining: float}>
+     * @return Collection<int, object{leaveType: LeaveType, entitled: float, used: float, remaining: float}>
      */
-    public function summaryForUser(User $user, int $year): \Illuminate\Support\Collection
+    public function summaryForUser(User $user, int $year): Collection
     {
         $leaveTypes = LeaveType::query()
+            ->where('tenant_id', $user->tenant_id)
             ->where('is_active', true)
             ->with('accrualRules')
             ->get();
@@ -179,8 +182,8 @@ class LeaveBalanceService
      */
     public function hasOverlap(User $user, \DateTimeInterface|string $start, \DateTimeInterface|string $end, ?int $excludeLeaveRequestId = null): bool
     {
-        $start = \Illuminate\Support\Carbon::parse($start);
-        $end = \Illuminate\Support\Carbon::parse($end);
+        $start = Carbon::parse($start);
+        $end = Carbon::parse($end);
 
         return $user->leaveRequests()
             ->whereIn('status', [LeaveRequest::STATUS_PENDING, LeaveRequest::STATUS_APPROVED])

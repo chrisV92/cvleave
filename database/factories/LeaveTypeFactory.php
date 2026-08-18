@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LeaveTypeFactory extends Factory
@@ -9,6 +10,7 @@ class LeaveTypeFactory extends Factory
     public function definition(): array
     {
         return [
+            'tenant_id' => Tenant::factory(),
             'name' => fake()->unique()->words(2, true),
             'color' => '#22c55e',
             'requires_note' => false,

@@ -67,7 +67,10 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   Still missing (in rough priority order):
   - Granular permissions beyond the current binary admin/employee — see the
     dedicated section below.
-  - A global/cross-tenant LeaveRequests view in the platform panel.
+  - A global/cross-tenant LeaveRequests view in the platform panel. The
+    dashboard now carries cross-tenant reporting (totals, signups per month,
+    and per-company activity with a last-used date to spot dormant customers),
+    but there is still no browsable list of every request across tenants.
   - Self-service *company* signup (a stranger creating a tenant) — distinct
     from employee invitations above; see the Onboarding flow item.
 - **Granular permissions / custom roles per company** — not started; the notes

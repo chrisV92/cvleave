@@ -310,5 +310,19 @@
     "Όρισε έναν κωδικό για τον λογαριασμό σου (:email) και είσαι έτοιμος.": "Set a password for your account (:email) and you are ready to go.",
     "Κωδικός": "Password",
     "Επιβεβαίωση κωδικού": "Confirm password",
-    "Αποθήκευση και σύνδεση": "Save and sign in"
+    "Αποθήκευση και σύνδεση": "Save and sign in",
+    ":count νέες αυτόν τον μήνα": ":count new this month",
+    ":count νέοι αυτόν τον μήνα": ":count new this month",
+    "Εκκρεμείς προσκλήσεις": "Pending invitations",
+    "Δεν έχουν ορίσει ακόμα κωδικό": "Have not set a password yet",
+    "Αιτήσεις άδειας :year": "Leave requests :year",
+    ":count εκκρεμούν προς έγκριση": ":count awaiting approval",
+    "Νέες εταιρείες ανά μήνα": "New companies per month",
+    "Τελευταίοι 12 μήνες": "Last 12 months",
+    "Νέες εταιρείες": "New companies",
+    "Δραστηριότητα ανά εταιρεία": "Activity by company",
+    "Αιτήσεις άδειας": "Leave requests",
+    "Τελευταία δραστηριότητα": "Last activity",
+    "— καμία —": "— none —",
+    "Εγγραφή": "Signed up"
 }

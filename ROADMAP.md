@@ -65,10 +65,52 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   and a test asserts each CTA matches a real route.
 
   Still missing (in rough priority order):
-  - Granular permissions beyond the current binary admin/employee.
+  - Granular permissions beyond the current binary admin/employee — see the
+    dedicated section below.
   - A global/cross-tenant LeaveRequests view in the platform panel.
   - Self-service *company* signup (a stranger creating a tenant) — distinct
     from employee invitations above; see the Onboarding flow item.
+- **Granular permissions / custom roles per company** — not started; the notes
+  below are a design discussion, not a decision.
+
+  *Why it is worth doing.* `isAdmin()` is checked in **18 places** and gates
+  about ten separate capabilities: managing users, managing leave types, seeing
+  everyone's requests, approving/rejecting, editing someone else's request,
+  filing leave on another person's behalf, the all-employees PDF, company
+  settings, the shared calendar and the admin guide. Today it is all-or-nothing,
+  so there is no way to have an HR person who adds employees but cannot approve
+  leave, or a supervisor who approves but cannot touch leave types.
+
+  *The foundation already exists.* Roles are already per-tenant — Spatie's teams
+  feature keys them by `tenant_id`, so every company has its own `admin` and
+  `employee` rows. The `permissions` table ships with the package and is
+  currently **empty**: we only ever used roles. So this extends what is there
+  rather than introducing new architecture.
+
+  *⚠️ The trap.* The most useful middle role — a "Task Manager" who approves
+  **their own team's** leave — is not a permissions problem at all, it is a
+  **data scoping** problem. Adding an `approve_leave_requests` permission
+  without a notion of teams produces a role that can approve *everyone* in the
+  company. That is arguably worse than the current state, because it looks
+  bounded while it is not. Team-scoped approval needs departments plus a
+  manager relationship, which is a separate and larger feature.
+
+  *Suggested sequencing:*
+  1. **Permission catalogue.** Define the ten-odd permissions, replace the 18
+     `isAdmin()` checks with permission checks, and seed `admin`/`employee` as
+     bundles of them. No visible change, but everything after it becomes
+     possible. Worth doing on its own merits.
+  2. **Roles UI per company.** An admin creates roles and ticks permissions.
+     This is where a "Task Manager" becomes expressible — company-wide.
+  3. **Departments/teams.** Only if approval authority needs to be scoped to a
+     manager's own people.
+
+  *Deliberately undecided:* whether companies should invent arbitrary role names
+  or pick from a fixed set with editable permissions, and whether the Task
+  Manager role is company-wide or team-scoped. Both were left open — the shape
+  of it may depend on a possible future "Task Plan" feature, which would change
+  what a Task Manager is responsible for in the first place.
+
 - **Billing** — Stripe/subscription integration, plan limits, trial handling.
 - **Legal validation** — the Greek-law formula should be reviewed by an
   accountant/lawyer before being relied on for real payroll decisions, and

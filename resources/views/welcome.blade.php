@@ -67,7 +67,7 @@
         .btn-lg { padding: 14px 28px; font-size: 15.5px; }
 
         /* ---------- hero ---------- */
-        .hero { position: relative; overflow: hidden; padding: 88px 0 60px; }
+        .hero { position: relative; overflow: hidden; padding: 82px 0 72px; }
         .hero::before {
             content: ''; position: absolute; inset: 0;
             background:
@@ -75,14 +75,27 @@
                 radial-gradient(520px 320px at 92% 4%, var(--amber-50), transparent 60%);
             pointer-events: none;
         }
-        .hero .wrap { position: relative; }
+                .hero .wrap { position: relative; }
+        .hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 54px; align-items: center; }
+        .hero p.lead { max-width: 46ch; }
+
+        /* app screenshot, framed like a window so it reads as the product */
+        .shot {
+            border-radius: 14px; overflow: hidden; background: var(--surface);
+            border: 1px solid var(--line);
+            box-shadow: 0 30px 60px -26px rgba(15,23,42,.32), 0 6px 16px rgba(15,23,42,.05);
+        }
+        .shot-bar { display: flex; gap: 6px; padding: 11px 14px; background: #f1f5f9; border-bottom: 1px solid var(--line); }
+        .shot-bar span { width: 10px; height: 10px; border-radius: 999px; background: #cbd5e1; }
+        .shot img { display: block; width: 100%; height: auto; }
+        @media (max-width: 980px) { .hero-grid { grid-template-columns: 1fr; gap: 42px; } }
         .pill {
             display: inline-flex; align-items: center; gap: 8px; margin-bottom: 22px;
             background: var(--surface); border: 1px solid var(--line); color: var(--indigo-700);
             font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px;
         }
         .pill .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--amber-400); }
-        .hero h1 { font-size: clamp(34px, 5.2vw, 54px); max-width: 860px; }
+        .hero h1 { font-size: clamp(34px, 5.2vw, 52px); max-width: 17ch; }
         .hero h1 em { font-style: normal; color: var(--indigo-600); }
         .hero p.lead { font-size: clamp(16.5px, 2vw, 19px); max-width: 60ch; margin-top: 20px; }
         .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
@@ -176,17 +189,28 @@
 </header>
 
 <div class="hero">
-    <div class="wrap">
-        <span class="pill"><span class="dot"></span>{{ __('Φτιαγμένο για ελληνικές επιχειρήσεις') }}</span>
-        <h1>{{ __('Οι άδειες της ομάδας σου,') }} <em>{{ __('χωρίς υπολογισμούς στο χέρι.') }}</em></h1>
-        <p class="lead">
-            {{ __('Το CvTech υπολογίζει αυτόματα το δικαίωμα άδειας κάθε υπαλλήλου βάσει του Α.Ν. 539/1945, κρατάει τα υπόλοιπα ενημερωμένα και δίνει στη διοίκηση εικόνα σε πραγματικό χρόνο.') }}
-        </p>
-        <div class="hero-cta">
-            <a href="{{ url('/admin') }}" class="btn btn-primary btn-lg">{{ __('Σύνδεση στην πλατφόρμα') }}</a>
-            <a href="#features" class="btn btn-ghost btn-lg">{{ __('Δες τι κάνει') }}</a>
+    <div class="wrap hero-grid">
+        <div class="hero-copy">
+            <span class="pill"><span class="dot"></span>{{ __('Φτιαγμένο για ελληνικές επιχειρήσεις') }}</span>
+            <h1>{{ __('Οι άδειες της ομάδας σου,') }} <em>{{ __('χωρίς υπολογισμούς στο χέρι.') }}</em></h1>
+            <p class="lead">
+                {{ __('Το CvTech υπολογίζει αυτόματα το δικαίωμα άδειας κάθε υπαλλήλου βάσει του Α.Ν. 539/1945, κρατάει τα υπόλοιπα ενημερωμένα και δίνει στη διοίκηση εικόνα σε πραγματικό χρόνο.') }}
+            </p>
+            <div class="hero-cta">
+                <a href="{{ url('/admin') }}" class="btn btn-primary btn-lg">{{ __('Σύνδεση στην πλατφόρμα') }}</a>
+                <a href="#features" class="btn btn-ghost btn-lg">{{ __('Δες τι κάνει') }}</a>
+            </div>
+            <p class="hero-note">{{ __('Κάθε εταιρεία με τον δικό της χώρο, τους δικούς της τύπους αδειών και τους δικούς της κανόνες.') }}</p>
         </div>
-        <p class="hero-note">{{ __('Κάθε εταιρεία με τον δικό της χώρο, τους δικούς της τύπους αδειών και τους δικούς της κανόνες.') }}</p>
+
+        <div class="hero-visual">
+            <figure class="shot" style="margin:0;">
+                <div class="shot-bar"><span></span><span></span><span></span></div>
+                <img src="{{ asset('img/landing/app-dashboard.png') }}"
+                     alt="{{ __('Ο πίνακας ελέγχου του CvTech: υπόλοιπα αδειών ανά τύπο και ημερολόγιο ομάδας.') }}"
+                     loading="lazy" width="1150" height="700">
+            </figure>
+        </div>
     </div>
 </div>
 

@@ -1,13 +1,18 @@
-# CVLeave — Future Directions
+# CvTech — Future Directions
 
-Internal dev tool for now. Notes below capture a conversation about turning this
-into a sellable SaaS product later, kept here so the context isn't lost.
+Notes below capture the conversations about turning this into a sellable SaaS
+product, kept here so the context isn't lost.
+
+The product is branded **CvTech** as of August 2026, deliberately named for a
+company rather than for leave management — the Task Manager specified below is
+the second module, and there may be more.
 
 ## Naming ideas considered
 
-- Ferio (brandable, from "feriae" = holidays)
-- Αδειολόγιο (Greek, descriptive)
-- LeaveIQ, OffDuty, TimeOff HQ
+Settled on **CvTech**. Earlier candidates, kept for the record: Ferio (from
+"feriae" = holidays), Αδειολόγιο, LeaveIQ, OffDuty, TimeOff HQ, and a later
+round aimed at a company-level name — Meltemi, Stoa, Argo, Delos, Pleiada,
+Talos, Daidalos, Metron.
 
 ## Could this be sold as a SaaS / subscription?
 
@@ -76,7 +81,7 @@ price/simplicity for the Greek market specifically, not on feature breadth.
 - **Granular permissions / custom roles per company** — not started; the notes
   below are a design discussion, not a decision.
 
-  *Why it is worth doing.* `isAdmin()` is checked in **18 places** and gates
+  *Why it is worth doing.* `isAdmin()` is checked in **19 places** across 13 files and gates
   about ten separate capabilities: managing users, managing leave types, seeing
   everyone's requests, approving/rejecting, editing someone else's request,
   filing leave on another person's behalf, the all-employees PDF, company
@@ -99,20 +104,23 @@ price/simplicity for the Greek market specifically, not on feature breadth.
   manager relationship, which is a separate and larger feature.
 
   *Suggested sequencing:*
-  1. **Permission catalogue.** Define the ten-odd permissions, replace the 18
+  1. **Permission catalogue.** Define the ten-odd permissions, replace the
      `isAdmin()` checks with permission checks, and seed `admin`/`employee` as
      bundles of them. No visible change, but everything after it becomes
-     possible. Worth doing on its own merits.
+     possible. **Now scheduled** as Phase 0 of the Task Manager below — that
+     module adds roughly ten more capability checks, and writing them as
+     `isAdmin()` only to rewrite them later is wasted work.
   2. **Roles UI per company.** An admin creates roles and ticks permissions.
      This is where a "Task Manager" becomes expressible — company-wide.
   3. **Departments/teams.** Only if approval authority needs to be scoped to a
      manager's own people.
 
-  *Deliberately undecided:* whether companies should invent arbitrary role names
-  or pick from a fixed set with editable permissions, and whether the Task
-  Manager role is company-wide or team-scoped. Both were left open — the shape
-  of it may depend on a possible future "Task Plan" feature, which would change
-  what a Task Manager is responsible for in the first place.
+  *Still undecided:* whether companies invent arbitrary role names or pick from
+  a fixed set with editable permissions, and whether the Task Manager role is
+  company-wide or team-scoped. The second question was parked until the Task
+  Plan feature existed to define what a Task Manager is responsible for; that
+  feature is now specified below, so it can be answered once projects have
+  owners and members.
 
 - **Billing** — Stripe/subscription integration, plan limits, trial handling.
 - **Legal validation** — the Greek-law formula should be reviewed by an
@@ -156,6 +164,98 @@ price/simplicity for the Greek market specifically, not on feature breadth.
 - **Production hosting** — this currently runs on a home server over
   Tailscale; a public product needs real infrastructure, backups, uptime.
 
+## Task Manager — planned, specified August 2026
+
+A second module inside the same tenant panel: projects containing tasks, a
+drag & drop kanban board, and — the part that makes it a product rather than a
+to-do list — **statuses and fields each company defines for itself**. Roughly
+what Monday.com and ActiveCollab do, scoped to what a Greek SME actually needs.
+
+The landing page has advertised this as "Σύντομα" since the CvTech rebrand.
+
+### Decisions taken
+
+- **Statuses and custom fields belong to the project**, with a set of company
+  defaults that a new project inherits. Per-company-only was the simpler
+  option and was rejected: a sales pipeline and a development backlog want
+  different columns, and retrofitting per-project scoping later would mean
+  migrating live data.
+
+- **Kanban via `relaticle/flowforge`** (MIT). It solves the genuinely fiddly
+  parts — fractional position ranking, optimistic UI, drag interactions.
+  Because the data model stays ours, replacing it later costs a view layer,
+  not a migration.
+
+- **Custom fields built in-house, deliberately.** `relaticle/custom-fields` is
+  the obvious candidate and is good, but it is **AGPL-3.0 or a paid commercial
+  licence**. AGPL's network clause would require publishing the whole
+  application source to anyone using the hosted product — incompatible with
+  selling it. This constraint is worth remembering before reaching for any
+  other plugin: check the licence *first*.
+
+- **Permission catalogue first.** See the granular-permissions section above;
+  the module adds around ten capability checks and there is no sense writing
+  them as `isAdmin()` twice.
+
+### Two requests that are not custom fields
+
+Both were asked for as field types. Neither can be one:
+
+- A **timer** is not a single value. It is a log of sessions — who worked,
+  from when to when, repeatedly. Squeezed into a value column you cannot answer
+  "how much time did this person put in last week". It gets its own
+  `task_time_entries` table, with one running timer per user (starting a second
+  stops the first).
+
+- **Attachments** are many rows per task, each with a file behind it, and files
+  need an access check. Paths in a value column work right until somebody
+  shares a URL. They get `task_attachments`, stored on the **private disk** and
+  served through an authenticated controller — not the public disk with
+  `storage:link`, which is precisely the hole that had to be closed in the PDF
+  report routes.
+
+Both become first-class task features, switchable per project.
+
+### Storage: typed EAV columns, not a JSON blob
+
+`custom_field_values` carries `value_string`, `value_text`, `value_number`,
+`value_date`, `value_boolean` and `value_json`, and each field type maps to
+one of them.
+
+The tempting alternative — a single JSON column on `tasks` — was rejected
+because **MariaDB 10.11 has no native JSON type and no multi-valued indexes**.
+JSON there is `LONGTEXT` with a validity check, so filtering or sorting by a
+custom field means a full table scan. Filtering and sorting by custom fields is
+most of what people do with them. If the database ever moves to PostgreSQL or
+MySQL 8, the calculation changes.
+
+### Phases
+
+0. **Permission catalogue** — prerequisite, no visible change.
+1. **Projects, statuses, tasks** — models, migrations, Filament resources under
+   a new navigation group; statuses seeded from company defaults the way
+   `Tenant::seedDefaultLeaveTypes()` already seeds leave types.
+2. **Custom fields** — definitions, values, and the service that turns a stored
+   definition into Filament form fields, table columns and filters. That
+   service is the load-bearing piece.
+3. **Kanban board** — starting with a spike to confirm Flowforge accepts
+   dynamic columns before anything depends on it. Public docs are thin.
+4. **Timer, attachments, comments.**
+5. **Documentation** — all three Knowledge Base guides in EL and EN with
+   screenshots, and the landing page stops saying "Σύντομα".
+
+### Known risks
+
+- Flowforge's published documentation does not show the integration API in
+  detail; it has to be confirmed against the installed version. Fallback is a
+  hand-rolled SortableJS board, about a day, with no change to the data model.
+- The drag handler receives a status id from the browser. It must verify that
+  status belongs to the project, or it is a cross-tenant write.
+- `tenant_id` is denormalised onto `projects` and `tasks` on purpose.
+  `LeaveRequest` has no direct tenant link, which forced
+  `$isScopedToTenant = false` plus a hand-written `whereHas('user', ...)` on
+  every query. Not repeating that.
+
 ## Near-term feature backlog (not SaaS-related, just "not built yet")
 
 - **Real SMTP provider** — Mailpit is dev-only; production needs a real
@@ -168,5 +268,16 @@ price/simplicity for the Greek market specifically, not on feature breadth.
 
 ## Status
 
-Core app: done and in active internal use. SaaS productization: parked,
-revisit if/when there's appetite. Backlog above: pick up opportunistically.
+**Leave management:** done and in active internal use. Multi-tenancy,
+invitations, carry-over, impersonation, the platform panel and the three
+Knowledge Base guides are all built.
+
+**Task Manager:** specified, not started. Phase 0 (permission catalogue) is the
+next piece of work.
+
+**SaaS productization:** the branding and landing page exist; billing,
+self-serve signup, real SMTP, CI/CD and production hosting do not. Nothing here
+can be sold until at minimum SMTP and `APP_DEBUG=false` are dealt with — a
+prospect cannot currently receive an invitation email.
+
+**Backlog:** pick up opportunistically.

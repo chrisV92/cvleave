@@ -269,7 +269,18 @@ MySQL 8, the calculation changes.
    project*, so an id from another board or another company cannot be moved
    into place — the package's own handler writes the incoming column id
    unvalidated, so this guard would have been needed either way.
-4. **Timer, attachments, comments.**
+4. **Timer, attachments, comments** — *done.* Both timers and attachments are
+   per-project switches, since a board that is a to-do list should not carry
+   timesheet controls. `App\Services\TimeTracking` enforces one running timer
+   per person: starting a second stops the first, or a forgotten timer bills a
+   task nobody touched. Durations are stored on stop rather than derived, so a
+   later clock change cannot rewrite how long something took.
+
+   Attachments live on the private disk and are served only through
+   `TaskAttachmentController`, which checks the viewer's company and permission
+   — the public disk with a storage link would make every file readable by
+   anyone holding the URL, and URLs get forwarded. Comments stay editable only
+   by their author.
 5. **Documentation** — all three Knowledge Base guides in EL and EN with
    screenshots, and the landing page stops saying "Σύντομα".
 

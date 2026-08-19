@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LeaveReportController;
+use App\Http\Controllers\TaskAttachmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,3 +29,9 @@ Route::get('/reports/employee/{user}', [LeaveReportController::class, 'employee'
 Route::get('/reports/all-employees', [LeaveReportController::class, 'allEmployees'])
     ->middleware('auth')
     ->name('reports.all-employees-leave');
+
+// Task attachments are stored on the private disk; this is the only way to
+// read one, and it checks the viewer's company and permission first.
+Route::get('/task-attachments/{attachment}', [TaskAttachmentController::class, 'show'])
+    ->middleware('auth')
+    ->name('task-attachments.show');

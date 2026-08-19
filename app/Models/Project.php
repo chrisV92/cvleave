@@ -19,6 +19,8 @@ class Project extends Model
         'description',
         'color',
         'owner_id',
+        'time_tracking_enabled',
+        'attachments_enabled',
         'archived_at',
         'position',
     ];
@@ -26,6 +28,8 @@ class Project extends Model
     protected function casts(): array
     {
         return [
+            'time_tracking_enabled' => 'boolean',
+            'attachments_enabled' => 'boolean',
             'archived_at' => 'datetime',
             'position' => 'integer',
         ];

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Task extends Model
 {
@@ -106,6 +107,27 @@ class Task extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function timeEntries(): HasMany
+    {
+        return $this->hasMany(TaskTimeEntry::class)->latest('started_at');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TaskAttachment::class)->latest();
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class)->oldest();
+    }
+
+    /** Total time logged, including any timer still running. */
+    public function trackedSeconds(): int
+    {
+        return (int) $this->timeEntries->sum(fn (TaskTimeEntry $entry) => $entry->seconds());
     }
 
     public function isOverdue(): bool

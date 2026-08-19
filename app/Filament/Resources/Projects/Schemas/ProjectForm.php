@@ -7,6 +7,7 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
@@ -58,6 +59,15 @@ class ProjectForm
                 ColorPicker::make('color')
                     ->label(__('Χρώμα'))
                     ->default('#6366f1'),
+
+                Toggle::make('time_tracking_enabled')
+                    ->label(__('Χρονομέτρηση εργασιών'))
+                    ->helperText(__('Επιτρέπει στα μέλη να ξεκινούν και να σταματούν χρονόμετρο σε κάθε εργασία.')),
+
+                Toggle::make('attachments_enabled')
+                    ->label(__('Συνημμένα αρχεία'))
+                    ->default(true)
+                    ->helperText(__('Επιτρέπει επισύναψη αρχείων και εικόνων στις εργασίες.')),
             ]);
     }
 }

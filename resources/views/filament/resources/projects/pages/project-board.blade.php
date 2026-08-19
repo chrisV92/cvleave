@@ -6,7 +6,13 @@
     .kb-col-head { display: flex; align-items: center; gap: 8px; padding: 4px 6px 10px 6px; }
     .kb-dot { width: 10px; height: 10px; border-radius: 999px; flex: 0 0 auto; }
     .kb-col-name { font-weight: 600; font-size: 14px; }
-    .kb-count { margin-left: auto; font-size: 12px; color: rgb(113 113 122); font-variant-numeric: tabular-nums; }
+    .kb-count {
+        margin-left: auto; min-width: 22px; padding: 2px 7px; border-radius: 999px;
+        background: rgb(228 228 231); color: rgb(82 82 91);
+        font-size: 11px; font-weight: 700; line-height: 1.5; text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+    .dark .kb-count { background: rgb(63 63 70); color: rgb(212 212 216); }
     .kb-list { display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
     .kb-card {
         background: #fff; border: 1px solid rgb(228 228 231); border-radius: 10px;

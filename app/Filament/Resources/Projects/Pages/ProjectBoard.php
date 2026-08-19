@@ -94,6 +94,17 @@ class ProjectBoard extends Page
     {
         return [
             $this->createTaskAction(),
+
+            // The columns and the fields of a board are edited on the project's
+            // settings page. Reaching it meant going back to the list and
+            // hunting for the row, which is a poor place to hide the one screen
+            // that decides what this board looks like.
+            Action::make('projectSettings')
+                ->label(__('Στήλες & Ρυθμίσεις'))
+                ->icon('heroicon-o-cog-6-tooth')
+                ->color('gray')
+                ->visible(fn () => ProjectResource::canEdit($this->getRecord()))
+                ->url(fn () => ProjectResource::getUrl('edit', ['record' => $this->getRecord()])),
         ];
     }
 

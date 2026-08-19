@@ -46,9 +46,17 @@ class TaskResource extends Resource
         return __('Εργασίες');
     }
 
+    /**
+     * Kept out of the sidebar on purpose.
+     *
+     * Work is reached through its board, which is where it has context — a
+     * flat list of every task across every project is rarely what somebody
+     * actually wants. The resource keeps its routes, because the board's
+     * cards and its "full page" button link straight to them.
+     */
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->can(Permissions::TASKS_VIEW) ?? false;
+        return false;
     }
 
     public static function canViewAny(): bool

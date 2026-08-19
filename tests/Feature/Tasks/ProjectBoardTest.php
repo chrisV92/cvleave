@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Resources\Projects\Pages\ProjectBoard;
+use App\Filament\Resources\Projects\Schemas\BoardTaskForm;
 use App\Models\CustomField;
 use App\Models\Project;
 use App\Models\Task;
@@ -10,6 +11,8 @@ use App\Models\User;
 use App\Services\CustomFieldSchema;
 use App\Services\TaskPosition;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
@@ -247,4 +250,104 @@ it('refuses a column from another project when saving the panel', function () {
     ], ['task' => $task->id])->assertHasActionErrors(['task_status_id']);
 
     expect($task->fresh()->task_status_id)->not->toBe($elsewhere->defaultStatus()->id);
+});
+
+it('creates a task straight into the column the plus was pressed on', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $review = $project->statuses()->where('name', 'Σε έλεγχο')->first();
+
+    actingInTenant($admin = User::factory()->for($tenant)->admin()->create());
+
+    board($project)->callAction('createTask', [
+        'title' => 'Από το board',
+        'task_status_id' => $review->id,
+        'priority' => Task::PRIORITY_NORMAL,
+    ], ['column' => $review->id]);
+
+    $task = Task::where('title', 'Από το board')->first();
+
+    expect($task)->not->toBeNull()
+        ->and($task->task_status_id)->toBe($review->id)
+        ->and($task->project_id)->toBe($project->id)
+        // From the project, never the session.
+        ->and($task->tenant_id)->toBe($tenant->id)
+        ->and($task->created_by)->toBe($admin->id);
+});
+
+it('defaults a new task to the column the plus names', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $review = $project->statuses()->where('name', 'Σε έλεγχο')->first();
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    board($project)
+        ->mountAction('createTask', ['column' => $review->id])
+        ->assertActionDataSet(['task_status_id' => $review->id]);
+});
+
+it('hands the browser the new card so the board shows it without a reload', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $todo = $project->defaultStatus();
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    board($project)
+        ->callAction('createTask', [
+            'title' => 'Ολοκαίνουρια',
+            'task_status_id' => $todo->id,
+        ], ['column' => $todo->id])
+        ->assertDispatched('board-card-added', fn (string $event, array $data) => $data['columnId'] === $todo->id
+            && str_contains($data['html'], 'Ολοκαίνουρια'));
+});
+
+it('offers no way to add a task to someone who may only look', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+
+    $viewer = User::factory()->for($tenant)->create();
+    actingInTenant($viewer);
+    $viewer->roles()->first()?->revokePermissionTo('tasks.manage');
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    board($project)->assertActionHidden('createTask');
+});
+
+it('attaches an uploaded file to a task edited from the board', function () {
+    Storage::fake('local');
+
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $task = Task::factory()->forProject($project)->create();
+
+    // Stored the way the upload field names files: a random prefix, the
+    // separator, then the name the person actually chose.
+    $path = UploadedFile::fake()->image('mockup.png')
+        ->storeAs('task-attachments/'.$tenant->id, 'abcdef__mockup.png', 'local');
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    BoardTaskForm::storeAttachments($task, [$path]);
+
+    $attachment = $task->fresh()->attachments()->first();
+
+    expect($attachment)->not->toBeNull()
+        // The original name rides along inside the stored filename, because the
+        // upload and the save happen in different requests.
+        ->and($attachment->original_name)->toBe('mockup.png')
+        ->and($attachment->size_bytes)->toBeGreaterThan(0)
+        ->and($attachment->isImage())->toBeTrue();
+});
+
+it('ignores an upload path that is not on disk', function () {
+    Storage::fake('local');
+
+    $tenant = Tenant::factory()->create();
+    $task = Task::factory()->forProject(Project::factory()->create(['tenant_id' => $tenant->id]))->create();
+
+    BoardTaskForm::storeAttachments($task, ['task-attachments/1/does-not-exist.png', '']);
+
+    expect($task->attachments()->count())->toBe(0);
 });

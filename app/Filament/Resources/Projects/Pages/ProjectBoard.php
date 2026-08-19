@@ -90,6 +90,84 @@ class ProjectBoard extends Page
             ->all();
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->createTaskAction(),
+        ];
+    }
+
+    /**
+     * Adding work without leaving the board.
+     *
+     * Takes an optional column argument so the "+" on a column head drops the
+     * task straight into that column — on a board, where something starts is
+     * usually the point.
+     */
+    public function createTaskAction(): Action
+    {
+        return Action::make('createTask')
+            ->label(__('Νέα Εργασία'))
+            ->icon('heroicon-o-plus')
+            ->visible(fn () => $this->canMove())
+            ->slideOver()
+            ->slideOverPosition(SlideOverPosition::End)
+            ->modalWidth(Width::Medium)
+            ->modalHeading(__('Νέα Εργασία'))
+            ->modalSubmitActionLabel(__('Δημιουργία'))
+            ->fillForm(fn (array $arguments): array => [
+                'task_status_id' => $this->resolveColumn($arguments)?->id
+                    ?? $this->getRecord()->defaultStatus()?->id,
+                'priority' => Task::PRIORITY_NORMAL,
+            ])
+            ->schema(fn () => BoardTaskForm::components($this->getRecord(), null))
+            ->action(function (array $data): void {
+                abort_unless($this->canMove(), 403);
+
+                $project = $this->getRecord();
+                $status = $project->statuses()->whereKey($data['task_status_id'])->first();
+
+                abort_unless($status, 404);
+
+                $custom = $data[CustomFieldSchema::STATE_KEY] ?? [];
+                $uploads = $data[BoardTaskForm::ATTACHMENTS_KEY] ?? [];
+                unset($data[CustomFieldSchema::STATE_KEY], $data[BoardTaskForm::ATTACHMENTS_KEY]);
+
+                $task = $project->tasks()->create($data + [
+                    // From the project, never the session — the two must agree.
+                    'tenant_id' => $project->tenant_id,
+                    'created_by' => auth()->id(),
+                    'position' => TaskPosition::endOf($status),
+                ]);
+
+                $task->saveCustomFieldState($custom);
+                BoardTaskForm::storeAttachments($task, array_values($uploads));
+
+                $this->appendCard($task->refresh());
+            });
+    }
+
+    protected function resolveColumn(array $arguments): ?TaskStatus
+    {
+        return $this->getRecord()->statuses()->whereKey($arguments['column'] ?? null)->first();
+    }
+
+    /** Hand the browser a card to add to the end of its column. */
+    protected function appendCard(Task $task): void
+    {
+        $task->load(['assignee', 'customFieldValues.customField']);
+
+        $this->dispatch(
+            'board-card-added',
+            columnId: $task->task_status_id,
+            html: view('filament.resources.projects.pages.partials.board-card', [
+                'task' => $task,
+                'fields' => $this->cardFields($task),
+                'canMove' => $this->canMove(),
+            ])->render(),
+        );
+    }
+
     /**
      * Editing a card without leaving the board.
      *
@@ -104,7 +182,7 @@ class ProjectBoard extends Page
     {
         return Action::make('editTask')
             ->slideOver()
-            ->slideOverPosition(SlideOverPosition::Start)
+            ->slideOverPosition(SlideOverPosition::End)
             ->modalWidth(Width::Medium)
             ->modalHeading(fn (array $arguments) => $this->resolveTask($arguments)?->title)
             ->modalSubmitActionLabel(__('Αποθήκευση'))
@@ -145,7 +223,8 @@ class ProjectBoard extends Page
                 abort_unless($task && TaskResource::canEdit($task), 403);
 
                 $custom = $data[CustomFieldSchema::STATE_KEY] ?? [];
-                unset($data[CustomFieldSchema::STATE_KEY]);
+                $uploads = $data[BoardTaskForm::ATTACHMENTS_KEY] ?? [];
+                unset($data[CustomFieldSchema::STATE_KEY], $data[BoardTaskForm::ATTACHMENTS_KEY]);
 
                 // The column belongs to this project or it does not exist —
                 // the same rule the drag handler applies.
@@ -156,6 +235,7 @@ class ProjectBoard extends Page
 
                 $task->update($data);
                 $task->saveCustomFieldState($custom);
+                BoardTaskForm::storeAttachments($task, array_values($uploads));
 
                 $this->refreshCard($task->refresh());
             });

@@ -166,3 +166,42 @@ it('still refuses an employee who reaches the create page directly', function ()
     $this->get(ProjectResource::getUrl('create', tenant: $tenant))
         ->assertForbidden();
 });
+
+it('lists each project under Έργα in the sidebar and keeps tasks out of it', function () {
+    $tenant = Tenant::factory()->create();
+    $live = Project::factory()->create(['tenant_id' => $tenant->id, 'name' => 'Ζωντανό', 'position' => 0]);
+    $shelved = Project::factory()->archived()->create(['tenant_id' => $tenant->id, 'name' => 'Στο αρχείο']);
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    $items = ProjectResource::getNavigationItems();
+    $children = collect($items[0]->getChildItems())->map(fn ($item) => $item->getLabel())->all();
+
+    expect($children)->toContain('Ζωντανό')
+        // Archived projects belong on the list page, not in the sidebar.
+        ->not->toContain('Στο αρχείο')
+        // The parent has no URL of its own — that is what keeps Filament from
+        // collapsing the children away until one of them is active.
+        ->and($items[0]->getUrl())->toBeNull()
+        ->and(TaskResource::shouldRegisterNavigation())->toBeFalse();
+
+    $board = collect($items[0]->getChildItems())->firstWhere(fn ($item) => $item->getLabel() === 'Ζωντανό');
+
+    expect($board->getUrl())->toBe(ProjectResource::getUrl('board', ['record' => $live], tenant: $tenant));
+});
+
+it('shows a company only its own projects in the sidebar', function () {
+    $acme = Tenant::factory()->create();
+    $other = Tenant::factory()->create();
+
+    Project::factory()->create(['tenant_id' => $acme->id, 'name' => 'Δικό μου']);
+    Project::factory()->create(['tenant_id' => $other->id, 'name' => 'Ξένο']);
+
+    actingInTenant(User::factory()->for($acme)->admin()->create());
+
+    $children = collect(ProjectResource::getNavigationItems()[0]->getChildItems())
+        ->map(fn ($item) => $item->getLabel())
+        ->all();
+
+    expect($children)->toContain('Δικό μου')->not->toContain('Ξένο');
+});

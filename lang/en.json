@@ -564,5 +564,22 @@
     "Στήλες και πεδία που ορίζει η κάθε εταιρεία": "Columns and fields each company defines",
     "Χρονομέτρηση, συνημμένα αρχεία και σχόλια": "Time tracking, file attachments and comments",
     "Ίδιοι χρήστες με τις άδειες, για ρεαλιστικό προγραμματισμό": "The same people as leave, for realistic planning",
-    "Πλήρης σελίδα": "Full page"
+    "Πλήρης σελίδα": "Full page",
+    "Όλα τα έργα": "All projects",
+    "Στο πλαϊνό μενού, κάτω από τα \"Έργα\", υπάρχει ένα στοιχείο για κάθε έργο της εταιρείας. Πατώντας το ανοίγει κατευθείαν ο πίνακας εκείνου του έργου — δεν χρειάζεται να περάσεις από ενδιάμεση λίστα.": "In the sidebar, under \"Projects\", there is an entry for every project in the company. Clicking it opens that project’s board directly — no list to pass through on the way.",
+    "Το \"Όλα τα έργα\" ανοίγει τη συνολική λίστα, με τα αρχειοθετημένα έργα και τον αριθμό εργασιών του καθενός.": "\"All projects\" opens the full list, including archived projects and the task count for each.",
+    "Δεν δημιουργείς εσύ έργα — αυτό το κάνει ο διαχειριστής. Μπορείς όμως να δημιουργήσεις εργασία, να την επεξεργαστείς και να τη μετακινήσεις μέσα στον πίνακα.": "You do not create projects — the administrator does. You can, however, create a task, edit it and move it around the board.",
+    "Στο πλαϊνό μενού, κάτω από τα \"Έργα\", κάθε έργο έχει το δικό του στοιχείο που ανοίγει απευθείας τον πίνακά του. Το \"Όλα τα έργα\" οδηγεί στη λίστα, από όπου δημιουργείς νέα. Μόνο εσύ μπορείς — οι υπάλληλοι βλέπουν τα έργα και δουλεύουν μέσα τους, αλλά δεν φτιάχνουν νέα ούτε αλλάζουν τις στήλες.": "In the sidebar, under \"Projects\", each project has its own entry opening its board directly. \"All projects\" leads to the list, which is where you create new ones. Only you can — employees see the projects and work inside them, but they do not create new ones or change the columns.",
+    "Ένα έργο που τελείωσε αρχειοθετείται: φεύγει από το πλαϊνό μενού και από τη λίστα ενεργών έργων, αλλά τίποτα δεν χάνεται και μπορεί να επανέλθει. Η διαγραφή παίρνει μαζί της στήλες και εργασίες οριστικά.": "A finished project is archived: it leaves the sidebar and the list of active projects, but nothing is lost and it can be restored. Deleting takes its columns and tasks with it permanently.",
+    "Νέα Εργασία": "New Task",
+    "Δημιουργία": "Create",
+    "Νέα εργασία σε αυτή τη στήλη": "New task in this column",
+    "Προσθήκη αρχείων": "Add files",
+    "Δεν υπάρχουν συνημμένα ακόμα.": "No attachments yet.",
+    "Πατώντας μια κάρτα": "Clicking a card",
+    "ανοίγει πλαϊνό παράθυρο με τα στοιχεία της, χωρίς να φύγεις από τον πίνακα. Αλλάζεις ό,τι χρειάζεται, πατάς Αποθήκευση και η κάρτα ενημερώνεται επιτόπου.": "opens a side panel with its details, without leaving the board. Change what you need, press Save, and the card updates in place.",
+    "Στο ίδιο παράθυρο βλέπεις και τα συνημμένα της εργασίας — οι εικόνες με μικρογραφία — και μπορείς να ανεβάσεις καινούρια. Για σχόλια, χρονόμετρο και διαγραφή αρχείων, το κουμπί \"Πλήρης σελίδα\" ανοίγει ολόκληρη την εργασία.": "The same panel shows the task's attachments — images as thumbnails — and lets you upload more. For comments, the timer and deleting files, the \"Full page\" button opens the whole task.",
+    "Νέα εργασία:": "New task:",
+    "το \"+\" δίπλα στο όνομα κάθε στήλης δημιουργεί εργασία απευθείας μέσα σε αυτήν. Υπάρχει και κουμπί \"Νέα Εργασία\" πάνω δεξιά, που την τοποθετεί στην αρχική στήλη.": "the \"+\" beside each column name creates a task straight into it. There is also a \"New Task\" button at the top right, which puts it in the starting column.",
+    "Τα συνημμένα φαίνονται και στο πλαϊνό παράθυρο του πίνακα, με μικρογραφία για τις εικόνες, και ανεβαίνουν από εκεί. Η διαγραφή τους γίνεται μόνο από την πλήρη σελίδα της εργασίας — είναι μη αναστρέψιμη και ανήκει δίπλα στη σωστή λίστα.": "Attachments also appear in the board's side panel, images as thumbnails, and can be uploaded from there. Deleting one is only possible from the task's full page — it cannot be undone and belongs next to the proper list."
 }

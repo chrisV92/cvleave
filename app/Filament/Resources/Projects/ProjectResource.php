@@ -13,12 +13,16 @@ use App\Filament\Resources\Projects\Tables\ProjectsTable;
 use App\Models\Project;
 use App\Support\Permissions;
 use BackedEnum;
+use Filament\Facades\Filament;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
+
+use function Filament\Support\original_request;
 
 class ProjectResource extends Resource
 {
@@ -72,6 +76,67 @@ class ProjectResource extends Resource
     public static function canDelete(Model $record): bool
     {
         return auth()->user()?->can(Permissions::PROJECTS_MANAGE) ?? false;
+    }
+
+    /**
+     * The sidebar entry, with each active project hanging beneath it.
+     *
+     * A board is what somebody actually wants when they think about a project,
+     * so each child goes straight to it rather than to the settings form.
+     *
+     * The parent carries no URL of its own, which is what makes Filament keep
+     * the children visible — it only expands an item that has a URL once that
+     * item or one of its children is active. "Όλα τα έργα" is the first child
+     * so the full list, including archived projects, stays one click away.
+     */
+    public static function getNavigationItems(): array
+    {
+        $items = parent::getNavigationItems();
+
+        if ($items === [] || ! (auth()->user()?->can(Permissions::TASKS_VIEW) ?? false)) {
+            return $items;
+        }
+
+        $tenant = Filament::getTenant();
+
+        if (! $tenant) {
+            return $items;
+        }
+
+        $listUrl = static::getUrl('index', tenant: $tenant);
+
+        $children = [
+            NavigationItem::make(__('Όλα τα έργα'))
+                ->url($listUrl)
+                ->isActiveWhen(fn (): bool => original_request()->url() === $listUrl),
+
+            ...static::boardNavigationItems($tenant),
+        ];
+
+        return [
+            $items[0]
+                ->url(null)
+                ->childItems($children),
+        ];
+    }
+
+    /** @return array<NavigationItem> */
+    protected static function boardNavigationItems(Model $tenant): array
+    {
+        return Project::query()
+            ->where('tenant_id', $tenant->getKey())
+            ->active()
+            ->orderBy('position')
+            ->orderBy('name')
+            ->get()
+            ->map(function (Project $project) use ($tenant) {
+                $url = static::getUrl('board', ['record' => $project], tenant: $tenant);
+
+                return NavigationItem::make($project->name)
+                    ->url($url)
+                    ->isActiveWhen(fn (): bool => original_request()->url() === $url);
+            })
+            ->all();
     }
 
     public static function form(Schema $schema): Schema

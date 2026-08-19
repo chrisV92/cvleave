@@ -26,6 +26,13 @@
     .kb-due-late { color: rgb(220 38 38); font-weight: 600; }
     .kb-ghost { opacity: .4; }
     .kb-drag { transform: rotate(1.5deg); }
+    .kb-add {
+        margin-left: 6px; width: 22px; height: 22px; line-height: 1; flex: 0 0 auto;
+        border-radius: 6px; border: 0; cursor: pointer; font-size: 16px; font-weight: 600;
+        color: rgb(113 113 122); background: transparent;
+    }
+    .kb-add:hover { background: rgb(228 228 231); color: rgb(63 63 70); }
+    .dark .kb-add:hover { background: rgb(63 63 70); color: rgb(228 228 231); }
     .kb-empty { font-size: 12px; color: rgb(161 161 170); text-align: center; padding: 14px 0; }
 </style>
 
@@ -97,6 +104,27 @@
         /** Whether a drag is in flight, so its trailing click is ignored. */
         dragging: false,
 
+        /** Open the panel to add a task, optionally into a given column. */
+        add(columnId) {
+            $wire.mountAction('createTask', { column: columnId });
+        },
+
+        /** Put a newly created card at the end of its column. */
+        appendCard({ columnId, html }) {
+            const list = this.$el.querySelector(`[data-column='${columnId}']`);
+            if (! list) return;
+
+            const holder = document.createElement('div');
+            holder.innerHTML = html.trim();
+            const card = holder.firstElementChild;
+
+            // Before the empty-state placeholder, which always sits last.
+            const empty = list.querySelector('.kb-empty');
+            empty ? list.insertBefore(card, empty) : list.appendChild(card);
+
+            this.refresh(list);
+        },
+
         /** Open the edit panel for a card. */
         open(taskId) {
             if (this.dragging) return;
@@ -159,6 +187,7 @@
         },
     }"
     x-on:board-card-updated.window="applyUpdate($event.detail)"
+    x-on:board-card-added.window="appendCard($event.detail)"
     class="kb-board"
     wire:ignore
 >
@@ -168,6 +197,15 @@
                 <span class="kb-dot" style="background: {{ $column->color }}"></span>
                 <span class="kb-col-name">{{ $column->name }}</span>
                 <span class="kb-count" data-count>{{ $column->tasks_count }}</span>
+
+                @if ($canMove)
+                    <button
+                        type="button"
+                        class="kb-add"
+                        title="{{ __('Νέα εργασία σε αυτή τη στήλη') }}"
+                        x-on:click="add({{ $column->id }})"
+                    >+</button>
+                @endif
             </div>
 
             <div class="kb-list" data-column="{{ $column->id }}">

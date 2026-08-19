@@ -117,20 +117,19 @@
             background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
             padding: 30px; display: flex; flex-direction: column; gap: 14px;
         }
-        .product.is-live { border-color: var(--indigo-500); box-shadow: 0 0 0 3px var(--indigo-50); }
         .product-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .product h3 { font-size: 20px; }
-        .tag {
-            font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
-            padding: 5px 11px; border-radius: 999px; white-space: nowrap;
-        }
-        .tag-live { background: #ecfdf5; color: #047857; }
-        .tag-soon { background: #f1f5f9; color: #64748b; }
         .product ul { margin: 4px 0 0; padding-left: 20px; font-size: 15px; }
         .product ul li { margin-bottom: 7px; }
 
         /* ---------- features ---------- */
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); gap: 20px; }
+        .feature-group { margin-bottom: 34px; }
+        .feature-group:last-child { margin-bottom: 0; }
+        .feature-group > h3 {
+            font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+            color: var(--indigo-600); margin-bottom: 16px;
+        }
         .feature {
             background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px;
         }
@@ -182,6 +181,7 @@
         <nav class="nav-links">
             <a href="#products">{{ __('Υπηρεσίες') }}</a>
             <a href="#features">{{ __('Δυνατότητες') }}</a>
+            <a href="#board">{{ __('Εργασίες') }}</a>
             <a href="#law">{{ __('Ελληνική νομοθεσία') }}</a>
         </nav>
         <a href="{{ url('/admin') }}" class="btn btn-primary">{{ __('Σύνδεση') }}</a>
@@ -218,15 +218,14 @@
     <div class="wrap">
         <div class="section-head">
             <p class="eyebrow">{{ __('Υπηρεσίες') }}</p>
-            <h2>{{ __('Μία πλατφόρμα, ένα εργαλείο τη φορά') }}</h2>
-            <p>{{ __('Ξεκινήσαμε από αυτό που πονάει περισσότερο στις ελληνικές ΜμΕ: τον υπολογισμό και την παρακολούθηση των αδειών.') }}</p>
+            <h2>{{ __('Μία πλατφόρμα, δύο εργαλεία') }}</h2>
+            <p>{{ __('Ξεκινήσαμε από αυτό που πονάει περισσότερο στις ελληνικές ΜμΕ — τον υπολογισμό των αδειών — και συνεχίσαμε με τη δουλειά που τρέχει δίπλα τους. Ίδιοι χρήστες, ίδιος χώρος, καμία διπλή καταχώριση.') }}</p>
         </div>
 
         <div class="products">
-            <article class="product is-live">
+            <article class="product">
                 <div class="product-top">
                     <h3>{{ __('Διαχείριση Αδειών') }}</h3>
-                    <span class="tag tag-live">{{ __('Διαθέσιμο') }}</span>
                 </div>
                 <p>{{ __('Από την υποβολή της αίτησης μέχρι την έγκριση και την αναφορά — με τα υπόλοιπα να ενημερώνονται μόνα τους.') }}</p>
                 <ul>
@@ -257,13 +256,12 @@
     <div class="wrap">
         <div class="section-head">
             <p class="eyebrow">{{ __('Δυνατότητες') }}</p>
-            <h2>{{ __('Ό,τι χρειάζεται μια εταιρεία για τις άδειες') }}</h2>
+            <h2>{{ __('Ό,τι χρειάζεται μια μικρή εταιρεία, σε δύο ενότητες') }}</h2>
         </div>
 
-        <div class="features">
-            @php
-                $features = [
-                    ['scale',    __('Ελληνική νομοθεσία'),      __('Κλιμακωτά 20/21/22/25/26 μέρες βάσει έτους απασχόλησης και συνολικής προϋπηρεσίας, με αναλογία στο πρώτο έτος.')],
+        @php
+            $leaveFeatures = [
+                ['scale',    __('Ελληνική νομοθεσία'),      __('Κλιμακωτά 20/21/22/25/26 μέρες βάσει έτους απασχόλησης και συνολικής προϋπηρεσίας, με αναλογία στο πρώτο έτος.')],
                     ['clock',    __('Μερική άδεια'),            __('Ολόκληρη μέρα, μισή μέρα ή ώρες — με αυτόματη μετατροπή σε ισοδύναμο ημερών.')],
                     ['refresh',  __('Μεταφορά υπολοίπου'),      __('Οι αχρησιμοποίητες μέρες περνούν στο νέο έτος, με προθεσμία που ορίζεις εσύ.')],
                     ['check',    __('Έλεγχοι πριν την έγκριση'),__('Επικαλύψεις και ανεπαρκές υπόλοιπο μπλοκάρονται τόσο στην υποβολή όσο και στην έγκριση.')],
@@ -271,10 +269,19 @@
                     ['bell',     __('Ειδοποιήσεις'),            __('Email και in-app σε κάθε υποβολή, έγκριση ή απόρριψη, με υπενθυμίσεις πριν την έναρξη.')],
                     ['doc',      __('Αναφορές & εξαγωγές'),     __('Αναφορές PDF ανά υπάλληλο ή συνολικές, και εξαγωγή σε Excel.')],
                     ['mail',     __('Προσκλήσεις με email'),    __('Ο υπάλληλος ορίζει μόνος του κωδικό — δεν μοιράζεις κωδικούς με το χέρι.')],
-                    ['globe',    __('Ελληνικά & Αγγλικά'),      __('Εναλλαγή γλώσσας εν κινήσει, για ομάδες με ξενόγλωσσο προσωπικό.')],
-                ];
+                ['globe',    __('Ελληνικά & Αγγλικά'),      __('Εναλλαγή γλώσσας εν κινήσει, για ομάδες με ξενόγλωσσο προσωπικό.')],
+            ];
 
-                $icons = [
+            $taskFeatures = [
+                ['columns',  __('Πίνακας kanban'),          __('Οι εργασίες σε στήλες, με μεταφορά καρτών. Η αλλαγή αποθηκεύεται με το που την αφήσεις.')],
+                ['layers',   __('Στήλες ανά έργο'),         __('Κάθε έργο ορίζει τη δική του ροή — οι πωλήσεις δεν κινούνται όπως η ανάπτυξη.')],
+                ['tag',      __('Δικά σου πεδία'),          __('Ποσά, ημερομηνίες, λίστες, χρήστες. Ανά εταιρεία ή ανά έργο, χωρίς προγραμματιστή.')],
+                ['clock',    __('Χρονομέτρηση'),            __('Έναρξη και διακοπή σε κάθε εργασία, με ένα μόνο χρονόμετρο ανά άτομο.')],
+                ['paperclip',__('Αρχεία και σχόλια'),       __('Συνημμένα με προεπισκόπηση εικόνων και συζήτηση πάνω στην εργασία.')],
+                ['users',    __('Ίδιοι χρήστες'),           __('Οι άνθρωποι που καταθέτουν άδεια είναι οι ίδιοι που αναλαμβάνουν τις εργασίες.')],
+            ];
+
+            $icons = [
                     'scale'    => '<path d="M12 3v18M5 7h14M7 7l-3 7h6zM17 7l-3 7h6z"/>',
                     'clock'    => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
                     'refresh'  => '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>',
@@ -283,20 +290,61 @@
                     'bell'     => '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
                     'doc'      => '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
                     'mail'     => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
-                    'globe'    => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/>',
-                ];
-            @endphp
+                'globe'    => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/>',
+                'columns'  => '<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="11" rx="1"/><rect x="16" y="4" width="5" height="14" rx="1"/>',
+                'layers'   => '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+                'tag'      => '<path d="M20 12 12 20l-8-8V4h8z"/><circle cx="8" cy="8" r="1.4"/>',
+                'paperclip'=> '<path d="M21 12.5 12.5 21a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5"/>',
+                'users'    => '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3.2 3.2 0 0 1 0 6M17.5 20a6.5 6.5 0 0 0-2.2-4.9"/>',
+            ];
+        @endphp
 
-            @foreach ($features as [$icon, $title, $text])
-                <div class="feature">
-                    <div class="ico">
-                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">{!! $icons[$icon] !!}</svg>
+        <div class="feature-group">
+            <h3>{{ __('Άδειες') }}</h3>
+            <div class="features">
+                @foreach ($leaveFeatures as [$icon, $title, $text])
+                    <div class="feature">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">{!! $icons[$icon] !!}</svg>
+                        </div>
+                        <h3>{{ $title }}</h3>
+                        <p>{{ $text }}</p>
                     </div>
-                    <h3>{{ $title }}</h3>
-                    <p>{{ $text }}</p>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
+
+        <div class="feature-group">
+            <h3>{{ __('Έργα & Εργασίες') }}</h3>
+            <div class="features">
+                @foreach ($taskFeatures as [$icon, $title, $text])
+                    <div class="feature">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">{!! $icons[$icon] !!}</svg>
+                        </div>
+                        <h3>{{ $title }}</h3>
+                        <p>{{ $text }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="board" style="padding-top: 0;">
+    <div class="wrap">
+        <div class="section-head">
+            <p class="eyebrow">{{ __('Διαχείριση Εργασιών') }}</p>
+            <h2>{{ __('Η δουλειά σε στήλες, όχι σε λίστες') }}</h2>
+            <p>{{ __('Κάθε έργο έχει τον δικό του πίνακα και τις δικές του στήλες. Σύρεις μια κάρτα, η κατάσταση αλλάζει — χωρίς φόρμες και χωρίς αποθήκευση.') }}</p>
+        </div>
+
+        <figure class="shot" style="margin: 0;">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="{{ asset('img/landing/kanban-board.png') }}"
+                 alt="{{ __('Πίνακας έργου στο CvTech: εργασίες σε στήλες, με προτεραιότητα, προθεσμία και ανάθεση σε κάθε κάρτα.') }}"
+                 loading="lazy" width="1128" height="426">
+        </figure>
     </div>
 </section>
 

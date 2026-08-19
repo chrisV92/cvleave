@@ -54,6 +54,14 @@
         .nav-links { display: flex; align-items: center; gap: 30px; }
         .nav-links a { font-size: 14.5px; font-weight: 600; color: var(--body); }
         .nav-links a:hover { color: var(--indigo-600); }
+        .nav-end { display: flex; align-items: center; gap: 16px; }
+        .lang { display: inline-flex; background: #f1f5f9; border-radius: 999px; padding: 3px; }
+        .lang-opt {
+            padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+            letter-spacing: .02em; color: #64748b;
+        }
+        .lang-opt:hover { color: var(--indigo-600); }
+        .lang-opt.is-on { background: #fff; color: var(--indigo-600); box-shadow: 0 1px 2px rgba(15,23,42,.08); }
 
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -156,6 +164,7 @@
 
         @media (max-width: 720px) {
             .nav-links { display: none; }
+            .nav-end { gap: 10px; }
             .band { padding: 38px 26px; border-radius: 16px; }
             section { padding: 58px 0; }
         }
@@ -184,7 +193,21 @@
             <a href="#board">{{ __('Εργασίες') }}</a>
             <a href="#law">{{ __('Ελληνική νομοθεσία') }}</a>
         </nav>
-        <a href="{{ url('/admin') }}" class="btn btn-primary">{{ __('Σύνδεση') }}</a>
+        <div class="nav-end">
+            {{-- The route stores the choice in the session and sends you back,
+                 so the switch works from here as well as inside the panel. --}}
+            <div class="lang" role="group" aria-label="{{ __('Γλώσσα') }}">
+                @foreach (['el' => 'ΕΛ', 'en' => 'EN'] as $locale => $short)
+                    <a
+                        href="{{ route('locale.switch', $locale) }}"
+                        class="lang-opt @if (app()->getLocale() === $locale) is-on @endif"
+                        @if (app()->getLocale() === $locale) aria-current="true" @endif
+                    >{{ $short }}</a>
+                @endforeach
+            </div>
+
+            <a href="{{ url('/admin') }}" class="btn btn-primary">{{ __('Σύνδεση') }}</a>
+        </div>
     </div>
 </header>
 

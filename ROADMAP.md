@@ -285,9 +285,9 @@ MySQL 8, the calculation changes.
    with 12 new screenshots, and the landing page no longer advertises task
    management as coming soon.
 
-   Noted while doing it: the landing page's own copy has never had English
-   translations — it renders Greek regardless of the chosen language. That
-   predates this work and is left as its own item below.
+   The landing page's copy was untranslated at that point and has since been
+   done: all 59 strings, plus an EL/EN switcher in its header, so a visitor
+   can read it in English without signing in first.
 
 ### Known risks
 
@@ -312,10 +312,11 @@ MySQL 8, the calculation changes.
   feature changes — there's no automated check for staleness. The screenshots
   are taken against a throwaway database seeded for the purpose; note that it
   shares `cvleave_test` with the suite, so running tests midway wipes it.
-- **Landing page has no English** — every string in `welcome.blade.php` goes
-  through `__()` but none of them are in `lang/en.json`, so the marketing page
-  stays Greek even when the panel is switched to English. Pre-dates the Task
-  Manager work.
+- **Landing page screenshots are Greek-only** — the page itself is translated
+  and carries its own EL/EN switcher, but the two product shots in it
+  (`app-dashboard.png`, `kanban-board.png`) are captures of a Greek interface
+  and stay Greek on the English page. Fixing it means a second capture per
+  image and swapping by locale, which is real maintenance for two files.
 
 ## Status
 

@@ -2,14 +2,17 @@
 
 namespace App\Filament\Resources\Tasks\Schemas;
 
+use App\Models\CustomField;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Services\CustomFieldSchema;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
@@ -83,6 +86,14 @@ class TaskForm
                 Textarea::make('description')
                     ->label(__('Περιγραφή'))
                     ->rows(5)
+                    ->columnSpanFull(),
+
+                // Which fields apply depends on the project, and the project
+                // select is live, so this section rebuilds when it changes.
+                Section::make(__('Πρόσθετα Πεδία'))
+                    ->schema(fn (Get $get) => CustomFieldSchema::formComponents($get('project_id')))
+                    ->visible(fn (Get $get) => CustomField::forProject($get('project_id'))->isNotEmpty())
+                    ->columns(2)
                     ->columnSpanFull(),
             ]);
     }

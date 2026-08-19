@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Projects;
 use App\Filament\Resources\Projects\Pages\CreateProject;
 use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Filament\Resources\Projects\Pages\ListProjects;
+use App\Filament\Resources\Projects\RelationManagers\CustomFieldsRelationManager;
 use App\Filament\Resources\Projects\RelationManagers\StatusesRelationManager;
 use App\Filament\Resources\Projects\Schemas\ProjectForm;
 use App\Filament\Resources\Projects\Tables\ProjectsTable;
@@ -86,6 +87,7 @@ class ProjectResource extends Resource
     {
         return [
             StatusesRelationManager::class,
+            CustomFieldsRelationManager::class,
         ];
     }
 

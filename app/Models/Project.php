@@ -70,6 +70,12 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    /** Fields defined for this board specifically, not the company's. */
+    public function customFields(): HasMany
+    {
+        return $this->hasMany(CustomField::class)->orderBy('position')->orderBy('id');
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;

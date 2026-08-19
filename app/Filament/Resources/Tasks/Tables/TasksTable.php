@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tasks\Tables;
 use App\Filament\Resources\Tasks\TaskResource;
 use App\Models\Project;
 use App\Models\Task;
+use App\Services\CustomFieldSchema;
 use App\Support\Permissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -23,6 +24,9 @@ class TasksTable
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            // The custom field columns read their values from the loaded
+            // relation, so without this each one costs a query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('customFieldValues.customField'))
             ->columns([
                 TextColumn::make('title')
                     ->label(__('Τίτλος'))
@@ -65,6 +69,8 @@ class TasksTable
                     ->sortable()
                     // Overdue is only interesting while the work is unfinished.
                     ->color(fn (Task $record) => $record->isOverdue() ? 'danger' : null),
+
+                ...CustomFieldSchema::tableColumns(Filament::getTenant()?->id ?? 0),
             ])
             ->filters([
                 SelectFilter::make('project_id')

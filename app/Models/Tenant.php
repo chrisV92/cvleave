@@ -66,6 +66,11 @@ class Tenant extends Model
         return $this->hasMany(TaskStatus::class);
     }
 
+    public function customFields(): HasMany
+    {
+        return $this->hasMany(CustomField::class);
+    }
+
     protected static function booted(): void
     {
         static::created(function (Tenant $tenant) {

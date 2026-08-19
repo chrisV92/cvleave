@@ -231,13 +231,26 @@ MySQL 8, the calculation changes.
 
 ### Phases
 
-0. **Permission catalogue** — prerequisite, no visible change.
-1. **Projects, statuses, tasks** — models, migrations, Filament resources under
-   a new navigation group; statuses seeded from company defaults the way
-   `Tenant::seedDefaultLeaveTypes()` already seeds leave types.
-2. **Custom fields** — definitions, values, and the service that turns a stored
-   definition into Filament form fields, table columns and filters. That
-   service is the load-bearing piece.
+0. **Permission catalogue** — *done.* Authorisation moved off `isAdmin()` onto
+   named permissions in `App\Support\Permissions`.
+1. **Projects, statuses, tasks** — *done.* Statuses are seeded from company
+   defaults the way leave types already are, and each project copies them so
+   one board can diverge without disturbing the rest.
+
+   Uncovered on the way: Filament's tenancy global scope was never active in
+   tests, because it is registered in `Panel::boot()` which only a real request
+   triggers. Every isolation test in the project had been passing because
+   nothing was scoped in either direction. `actingInTenant()` now boots the
+   panel per test — per test, not once, since each builds a fresh container and
+   the scope closure compares against the Panel instance it captured.
+2. **Custom fields** — *done.* Definitions are company-wide (applying to every
+   board) or project-specific; unlike statuses they are inherited rather than
+   copied, since a field like "Contract value" means the same thing everywhere.
+   Values sit in typed columns chosen by `App\Support\CustomFieldType`, and
+   `App\Services\CustomFieldSchema` turns a stored definition into a form
+   input or a table column. Writes are filtered through the fields that
+   actually apply to the task's project, so a crafted submission cannot attach
+   another board's — or another company's — field.
 3. **Kanban board** — starting with a spike to confirm Flowforge accepts
    dynamic columns before anything depends on it. Public docs are thin.
 4. **Timer, attachments, comments.**

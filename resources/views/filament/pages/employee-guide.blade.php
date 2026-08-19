@@ -19,8 +19,8 @@
 
 <div
     x-data="{
-        active: 'dashboard',
-        ids: ['dashboard', 'carryover', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account'],
+        active: 'first-login',
+        ids: ['first-login', 'dashboard', 'carryover', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -38,19 +38,36 @@
     <nav class="kb-nav-sticky" style="position: sticky; top: 90px;">
         <x-filament::section heading="{{ __('Γρήγορη Πλοήγηση') }}" icon="heroicon-o-list-bullet">
             <ul class="kb-toc">
-                <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">1. {{ __('Ο Πίνακας Ελέγχου σου') }}</a></li>
-                <li><a href="#carryover" :class="active === 'carryover' && 'kb-toc-active'">2. {{ __('Μέρες από το προηγούμενο έτος') }}</a></li>
-                <li><a href="#submit-request" :class="active === 'submit-request' && 'kb-toc-active'">3. {{ __('Πώς να υποβάλεις αίτηση άδειας') }}</a></li>
-                <li><a href="#partial-leave" :class="active === 'partial-leave' && 'kb-toc-active'">4. {{ __('Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)') }}</a></li>
-                <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">5. {{ __('Οι Αιτήσεις σου') }}</a></li>
-                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">6. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
-                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">7. {{ __('Ειδοποιήσεις') }}</a></li>
-                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">8. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
+                <li><a href="#first-login" :class="active === 'first-login' && 'kb-toc-active'">1. {{ __('Η πρώτη σου σύνδεση') }}</a></li>
+                <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">2. {{ __('Ο Πίνακας Ελέγχου σου') }}</a></li>
+                <li><a href="#carryover" :class="active === 'carryover' && 'kb-toc-active'">3. {{ __('Μέρες από το προηγούμενο έτος') }}</a></li>
+                <li><a href="#submit-request" :class="active === 'submit-request' && 'kb-toc-active'">4. {{ __('Πώς να υποβάλεις αίτηση άδειας') }}</a></li>
+                <li><a href="#partial-leave" :class="active === 'partial-leave' && 'kb-toc-active'">5. {{ __('Πώς να υποβάλεις μερική άδεια (μισή μέρα ή ώρες)') }}</a></li>
+                <li><a href="#your-requests" :class="active === 'your-requests' && 'kb-toc-active'">6. {{ __('Οι Αιτήσεις σου') }}</a></li>
+                <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">7. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
+                <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">8. {{ __('Ειδοποιήσεις') }}</a></li>
+                <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">9. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
 
     <div style="display: flex; flex-direction: column; gap: 24px;">
+
+    <x-filament::section id="first-login" heading="{{ __('Η πρώτη σου σύνδεση') }}" icon="heroicon-o-key">
+        <div class="kb-section">
+            <p>{{ __('Δεν δημιουργείς εσύ λογαριασμό. Ο διαχειριστής της εταιρείας σου σε προσθέτει, και εσύ λαμβάνεις email με έναν προσωπικό σύνδεσμο.') }}</p>
+            <ol>
+                <li>{{ __('Άνοιξε το email και πάτα το κουμπί της πρόσκλησης.') }}</li>
+                <li>{{ __('Στη σελίδα που ανοίγει, όρισε τον κωδικό σου και επιβεβαίωσέ τον.') }}</li>
+                <li>{{ __('Πατώντας "Αποθήκευση και σύνδεση" μπαίνεις κατευθείαν στην εφαρμογή — δεν χρειάζεται δεύτερη σύνδεση.') }}</li>
+            </ol>
+            <img src="{{ asset('img/kb/24-employee-accept-invitation.png') }}" class="kb-shot" alt="Set your password from the invitation link">
+            <p>{{ __('Τον κωδικό τον ορίζεις μόνο εσύ — ο διαχειριστής δεν τον βλέπει και δεν μπορεί να τον ανακτήσει.') }}</p>
+            <p><strong>{{ __('Ο σύνδεσμος ισχύει για 7 ημέρες και χρησιμοποιείται μία μόνο φορά.') }}</strong> {{ __('Αν αργήσεις ή αν δεις το μήνυμα "Ο σύνδεσμος δεν ισχύει", ζήτησε από τον διαχειριστή σου να πατήσει "Επαναποστολή πρόσκλησης". Θα λάβεις καινούριο email — ο παλιός σύνδεσμος παύει αμέσως να δουλεύει.') }}</p>
+            <p>{{ __('Από εκεί και πέρα συνδέεσαι κανονικά με το email και τον κωδικό σου. Αν τον ξεχάσεις, χρησιμοποίησε το "Ξεχάσατε τον κωδικό σας;" στη σελίδα σύνδεσης.') }}</p>
+            <img src="{{ asset('img/kb/00-login.png') }}" class="kb-shot" alt="Login screen">
+        </div>
+    </x-filament::section>
 
     <x-filament::section id="dashboard" heading="{{ __('Ο Πίνακας Ελέγχου σου') }}" icon="heroicon-o-home">
         <div class="kb-section">
@@ -66,6 +83,7 @@
         <div class="kb-section">
             <p>{{ __('Αν η εταιρεία σου το επιτρέπει, οι μέρες άδειας που δεν πρόλαβες να χρησιμοποιήσεις πέρσι μεταφέρονται στο νέο έτος — αλλά μόνο μέχρι μια συγκεκριμένη ημερομηνία (π.χ. 31 Μαρτίου).') }}</p>
             <p>{{ __('Στον Πίνακα Ελέγχου θα δεις γι\' αυτές ξεχωριστή κάρτα, με την ένδειξη πότε λήγουν. Δεν προστίθενται στο φετινό σου υπόλοιπο· εμφανίζονται χωριστά ακριβώς για να ξέρεις τι κινδυνεύεις να χάσεις.') }}</p>
+            <img src="{{ asset('img/kb/25-employee-carryover-card.png') }}" class="kb-shot" alt="Carried-over days card on the dashboard">
             <ul>
                 <li>{{ __('Όταν υποβάλλεις άδεια, χρησιμοποιούνται ΠΡΩΤΑ οι περσινές μέρες, αφού αυτές λήγουν.') }}</li>
                 <li>{{ __('Μια αίτηση μπορεί να καλύψει και τα δύο: π.χ. αν σου έχουν μείνει 3 περσινές μέρες και ζητήσεις 5, θα πάρει 3 από πέρσι και 2 από φέτος.') }}</li>

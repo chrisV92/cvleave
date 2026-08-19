@@ -19,6 +19,10 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Own compiled-view cache: sharing storage/framework/views with the
+             web server makes Blade's touch() fail, since utime() with an explicit
+             time needs ownership and the two run as different users. -->
+        <env name="VIEW_COMPILED_PATH" value="storage/framework/testing/views"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

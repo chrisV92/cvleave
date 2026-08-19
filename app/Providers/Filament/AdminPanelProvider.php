@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Tenancy\EditCompanySettings;
+use App\Http\Middleware\SetDefaultTenant;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeamId;
 use App\Models\Tenant;
@@ -73,6 +74,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                // After Authenticate, so there is a user to read the company
+                // from — see the middleware for why the routes without a slug
+                // need one at all.
+                SetDefaultTenant::class,
             ]);
     }
 }

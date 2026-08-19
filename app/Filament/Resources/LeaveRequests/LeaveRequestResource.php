@@ -8,6 +8,7 @@ use App\Filament\Resources\LeaveRequests\Pages\ListLeaveRequests;
 use App\Filament\Resources\LeaveRequests\Schemas\LeaveRequestForm;
 use App\Filament\Resources\LeaveRequests\Tables\LeaveRequestsTable;
 use App\Models\LeaveRequest;
+use App\Support\Permissions;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
@@ -50,7 +51,7 @@ class LeaveRequestResource extends Resource
         $query = parent::getEloquentQuery()
             ->whereHas('user', fn (Builder $query) => $query->where('tenant_id', Filament::getTenant()?->id));
 
-        if (! (auth()->user()?->isAdmin() ?? false)) {
+        if (! (auth()->user()?->can(Permissions::LEAVE_VIEW_ALL) ?? false)) {
             $query->where('user_id', auth()->id());
         }
 
@@ -59,7 +60,7 @@ class LeaveRequestResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        if (auth()->user()?->isAdmin() ?? false) {
+        if (auth()->user()?->can(Permissions::LEAVE_MANAGE) ?? false) {
             return true;
         }
 

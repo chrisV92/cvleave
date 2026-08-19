@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Permissions;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
@@ -50,9 +51,24 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         ];
     }
 
+    /**
+     * Kept as a role check on purpose. Authorisation decisions go through
+     * permissions (see App\Support\Permissions); this answers the different
+     * question of whether someone holds the built-in admin role, which is what
+     * seeding and the platform panel care about.
+     */
     public function isAdmin(): bool
     {
         return $this->hasRole('admin');
+    }
+
+    /**
+     * Whether this user manages the company in any capacity, rather than only
+     * working in it. Decides who is offered the admin-facing guide.
+     */
+    public function managesCompany(): bool
+    {
+        return $this->hasAnyPermission(Permissions::management());
     }
 
     public function canAccessPanel(Panel $panel): bool

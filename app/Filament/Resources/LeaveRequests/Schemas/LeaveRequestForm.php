@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LeaveRequests\Schemas;
 
 use App\Models\LeaveType;
 use App\Services\LeaveBalanceService;
+use App\Support\Permissions;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -16,7 +17,9 @@ class LeaveRequestForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $isAdmin = auth()->user()?->isAdmin() ?? false;
+        $viewer = auth()->user();
+        $canManage = $viewer?->can(Permissions::LEAVE_MANAGE) ?? false;
+        $canApprove = $viewer?->can(Permissions::LEAVE_APPROVE) ?? false;
 
         return $schema
             ->components([
@@ -24,7 +27,7 @@ class LeaveRequestForm
                     ->label(__('Υπάλληλος'))
                     ->relationship('user', 'name', fn ($query) => $query->where('tenant_id', Filament::getTenant()?->id))
                     ->required()
-                    ->visible($isAdmin)
+                    ->visible($canManage)
                     ->default(fn () => auth()->id()),
 
                 Select::make('leave_type_id')
@@ -111,13 +114,13 @@ class LeaveRequestForm
                         'cancelled' => __('Ακυρώθηκε'),
                     ])
                     ->default('pending')
-                    ->visible($isAdmin)
-                    ->required($isAdmin),
+                    ->visible($canApprove)
+                    ->required($canApprove),
 
                 Textarea::make('rejection_reason')
                     ->label(__('Αιτία απόρριψης'))
                     ->columnSpanFull()
-                    ->visible(fn ($get) => $isAdmin && $get('status') === 'rejected'),
+                    ->visible(fn ($get) => $canApprove && $get('status') === 'rejected'),
             ]);
     }
 

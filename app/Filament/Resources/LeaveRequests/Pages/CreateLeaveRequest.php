@@ -8,6 +8,7 @@ use App\Models\LeaveType;
 use App\Models\User;
 use App\Notifications\LeaveRequestSubmitted;
 use App\Services\LeaveBalanceService;
+use App\Support\Permissions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Carbon;
@@ -18,7 +19,7 @@ class CreateLeaveRequest extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if (! (auth()->user()?->isAdmin() ?? false)) {
+        if (! (auth()->user()?->can(Permissions::LEAVE_MANAGE) ?? false)) {
             $data['user_id'] = auth()->id();
             $data['status'] = LeaveRequest::STATUS_PENDING;
         }

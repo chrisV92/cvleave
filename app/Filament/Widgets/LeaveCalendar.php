@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\LeaveRequest;
+use App\Support\Permissions;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 
 class LeaveCalendar extends FullCalendarWidget
@@ -13,7 +14,7 @@ class LeaveCalendar extends FullCalendarWidget
 
     public function fetchEvents(array $info): array
     {
-        $isAdmin = auth()->user()?->isAdmin() ?? false;
+        $isAdmin = auth()->user()?->can(Permissions::LEAVE_VIEW_ALL) ?? false;
 
         $query = LeaveRequest::query()
             ->with(['leaveType', 'user'])

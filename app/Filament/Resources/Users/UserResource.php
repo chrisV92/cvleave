@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\RelationManagers\LeaveBalancesRelationManager;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
+use App\Support\Permissions;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -38,12 +39,12 @@ class UserResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return auth()->user()?->can(Permissions::USERS_MANAGE) ?? false;
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return auth()->user()?->can(Permissions::USERS_MANAGE) ?? false;
     }
 
     public static function form(Schema $schema): Schema

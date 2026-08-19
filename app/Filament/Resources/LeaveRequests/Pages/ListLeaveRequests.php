@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LeaveRequests\Pages;
 
 use App\Filament\Exports\LeaveRequestExporter;
 use App\Filament\Resources\LeaveRequests\LeaveRequestResource;
+use App\Support\Permissions;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
@@ -15,10 +16,10 @@ class ListLeaveRequests extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        $isAdmin = auth()->user()?->isAdmin() ?? false;
+        $canExportAll = auth()->user()?->can(Permissions::LEAVE_EXPORT_ALL) ?? false;
 
         return [
-            $isAdmin
+            $canExportAll
                 ? Action::make('allEmployeesPdfReport')
                     ->label(__('Αναφορά Όλων (PDF)'))
                     ->icon('heroicon-o-document-arrow-down')

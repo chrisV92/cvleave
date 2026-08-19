@@ -6,6 +6,7 @@ use App\Filament\Exports\LeaveRequestExporter;
 use App\Filament\Resources\LeaveRequests\LeaveRequestResource;
 use App\Models\LeaveRequest;
 use App\Services\LeaveBalanceService;
+use App\Support\Permissions;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -22,7 +23,9 @@ class LeaveRequestsTable
 {
     public static function configure(Table $table): Table
     {
-        $isAdmin = auth()->user()?->isAdmin() ?? false;
+        $viewer = auth()->user();
+        $canViewAll = $viewer?->can(Permissions::LEAVE_VIEW_ALL) ?? false;
+        $canApprove = $viewer?->can(Permissions::LEAVE_APPROVE) ?? false;
 
         return $table
             ->recordUrl(fn (LeaveRequest $record) => LeaveRequestResource::canEdit($record)
@@ -32,7 +35,7 @@ class LeaveRequestsTable
                 TextColumn::make('user.name')
                     ->label(__('Υπάλληλος'))
                     ->searchable()
-                    ->visible($isAdmin),
+                    ->visible($canViewAll),
                 TextColumn::make('leaveType.name')
                     ->label(__('Τύπος'))
                     ->badge()
@@ -76,7 +79,7 @@ class LeaveRequestsTable
                 TextColumn::make('reviewer.name')
                     ->label(__('Έλεγχος από'))
                     ->placeholder('—')
-                    ->visible($isAdmin),
+                    ->visible($canViewAll),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -94,7 +97,7 @@ class LeaveRequestsTable
                     ->label(__('Έγκριση'))
                     ->icon('heroicon-o-check')
                     ->color('success')
-                    ->visible(fn (LeaveRequest $record) => $isAdmin && $record->status === LeaveRequest::STATUS_PENDING)
+                    ->visible(fn (LeaveRequest $record) => $canApprove && $record->status === LeaveRequest::STATUS_PENDING)
                     ->requiresConfirmation()
                     ->action(function (LeaveRequest $record) {
                         $service = app(LeaveBalanceService::class);
@@ -137,7 +140,7 @@ class LeaveRequestsTable
                     ->label(__('Απόρριψη'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
-                    ->visible(fn (LeaveRequest $record) => $isAdmin && $record->status === LeaveRequest::STATUS_PENDING)
+                    ->visible(fn (LeaveRequest $record) => $canApprove && $record->status === LeaveRequest::STATUS_PENDING)
                     ->requiresConfirmation()
                     ->schema([
                         Textarea::make('rejection_reason')

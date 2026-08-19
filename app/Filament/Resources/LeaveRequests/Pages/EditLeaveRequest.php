@@ -7,6 +7,7 @@ use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\User;
 use App\Services\LeaveBalanceService;
+use App\Support\Permissions;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -25,8 +26,13 @@ class EditLeaveRequest extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (! (auth()->user()?->isAdmin() ?? false)) {
+        $viewer = auth()->user();
+
+        if (! ($viewer?->can(Permissions::LEAVE_MANAGE) ?? false)) {
             $data['user_id'] = $this->record->user_id;
+        }
+
+        if (! ($viewer?->can(Permissions::LEAVE_APPROVE) ?? false)) {
             $data['status'] = LeaveRequest::STATUS_PENDING;
         }
 
@@ -57,7 +63,7 @@ class EditLeaveRequest extends EditRecord
 
         $service = app(LeaveBalanceService::class);
 
-        if (auth()->user()?->isAdmin() ?? false) {
+        if (auth()->user()?->can(Permissions::LEAVE_APPROVE) ?? false) {
             $this->guardAdminApproval($data, $service);
 
             return;

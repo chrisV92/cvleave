@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Permissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -65,12 +66,18 @@ class Tenant extends Model
 
     public function seedDefaultRoles(): void
     {
+        // Permissions are global, not per-tenant, so they are created once and
+        // shared. Only the role-to-permission assignment below is per company.
+        Permissions::ensureExist();
+
         $registrar = app(PermissionRegistrar::class);
         $previousTeamId = $registrar->getPermissionsTeamId();
         $registrar->setPermissionsTeamId($this->id);
 
-        Role::firstOrCreate(['name' => 'admin', 'tenant_id' => $this->id]);
-        Role::firstOrCreate(['name' => 'employee', 'tenant_id' => $this->id]);
+        foreach (Permissions::roleBundles() as $name => $permissions) {
+            $role = Role::firstOrCreate(['name' => $name, 'tenant_id' => $this->id]);
+            $role->syncPermissions($permissions);
+        }
 
         $registrar->setPermissionsTeamId($previousTeamId);
     }

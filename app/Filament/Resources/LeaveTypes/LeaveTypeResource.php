@@ -9,6 +9,7 @@ use App\Filament\Resources\LeaveTypes\RelationManagers\AccrualRulesRelationManag
 use App\Filament\Resources\LeaveTypes\Schemas\LeaveTypeForm;
 use App\Filament\Resources\LeaveTypes\Tables\LeaveTypesTable;
 use App\Models\LeaveType;
+use App\Support\Permissions;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -38,12 +39,12 @@ class LeaveTypeResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return auth()->user()?->can(Permissions::LEAVE_TYPES_MANAGE) ?? false;
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return auth()->user()?->can(Permissions::LEAVE_TYPES_MANAGE) ?? false;
     }
 
     public static function form(Schema $schema): Schema

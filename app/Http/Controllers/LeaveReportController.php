@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Services\LeaveBalanceService;
+use App\Support\Permissions;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 
@@ -16,7 +17,7 @@ class LeaveReportController extends Controller
         abort_unless($viewer && (
             $viewer->id === $user->id
             || $viewer->is_platform_admin
-            || ($viewer->isAdmin() && $viewer->tenant_id === $user->tenant_id)
+            || ($viewer->can(Permissions::LEAVE_VIEW_ALL) && $viewer->tenant_id === $user->tenant_id)
         ), 403);
 
         $year = now()->year;
@@ -43,7 +44,7 @@ class LeaveReportController extends Controller
     public function allEmployees(): Response
     {
         $viewer = auth()->user();
-        abort_unless($viewer && $viewer->isAdmin(), 403);
+        abort_unless($viewer && $viewer->can(Permissions::LEAVE_EXPORT_ALL), 403);
 
         $leaveRequests = LeaveRequest::query()
             ->whereHas('user', fn ($query) => $query->where('tenant_id', $viewer->tenant_id))

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Tenancy;
 
+use App\Support\Permissions;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -97,6 +98,6 @@ class EditCompanySettings extends EditTenantProfile
 
     public static function canView(Model $tenant): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return auth()->user()?->can(Permissions::COMPANY_SETTINGS) ?? false;
     }
 }

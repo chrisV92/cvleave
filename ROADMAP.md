@@ -312,11 +312,13 @@ MySQL 8, the calculation changes.
   feature changes — there's no automated check for staleness. The screenshots
   are taken against a throwaway database seeded for the purpose; note that it
   shares `cvleave_test` with the suite, so running tests midway wipes it.
-- **Landing page screenshots are Greek-only** — the page itself is translated
-  and carries its own EL/EN switcher, but the two product shots in it
-  (`app-dashboard.png`, `kanban-board.png`) are captures of a Greek interface
-  and stay Greek on the English page. Fixing it means a second capture per
-  image and swapping by locale, which is real maintenance for two files.
+- **Landing page screenshots** — done. Each shot exists twice, captured from
+  a Greek and an English demo company, and `welcome.blade.php` picks by
+  locale. Both are framed by measuring the DOM rather than by fixed numbers,
+  so the pairs come out identical in size and switching language shifts
+  nothing. The seeds live outside the repo; re-taking them means seeding a
+  company whose *data* is in the target language, since leave types, column
+  names and project names are company data rather than interface text.
 
 ## Status
 

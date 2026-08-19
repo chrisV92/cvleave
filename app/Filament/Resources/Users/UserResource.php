@@ -15,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class UserResource extends Resource
 {
@@ -23,9 +22,17 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Εταιρεία';
-
     protected static ?int $navigationSort = 1;
+
+    /**
+     * Resolved per request rather than set as a static property: a
+     * property is evaluated when the class loads, which freezes the
+     * group name into whichever language happened to be active first.
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Εταιρεία');
+    }
 
     public static function getNavigationLabel(): string
     {

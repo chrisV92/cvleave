@@ -14,7 +14,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 
 /**
  * The company's own fields — the ones that apply to every board.
@@ -29,9 +28,17 @@ class CustomFieldResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Έργα';
-
     protected static ?int $navigationSort = 3;
+
+    /**
+     * Resolved per request rather than set as a static property: a
+     * property is evaluated when the class loads, which freezes the
+     * group name into whichever language happened to be active first.
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Έργα');
+    }
 
     public static function getNavigationLabel(): string
     {

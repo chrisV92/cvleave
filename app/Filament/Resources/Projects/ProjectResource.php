@@ -20,7 +20,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 
 use function Filament\Support\original_request;
 
@@ -30,9 +29,17 @@ class ProjectResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Έργα';
-
     protected static ?int $navigationSort = 1;
+
+    /**
+     * Resolved per request rather than set as a static property: a
+     * property is evaluated when the class loads, which freezes the
+     * group name into whichever language happened to be active first.
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Έργα');
+    }
 
     public static function getNavigationLabel(): string
     {

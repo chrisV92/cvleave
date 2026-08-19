@@ -17,15 +17,12 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 
 class LeaveRequestResource extends Resource
 {
     protected static ?string $model = LeaveRequest::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Άδειες';
 
     protected static ?int $navigationSort = 1;
 
@@ -35,6 +32,16 @@ class LeaveRequestResource extends Resource
      * below, so Filament's automatic tenant-ownership scoping is disabled.
      */
     protected static bool $isScopedToTenant = false;
+
+    /**
+     * Resolved per request rather than set as a static property: a
+     * property is evaluated when the class loads, which freezes the
+     * group name into whichever language happened to be active first.
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Άδειες');
+    }
 
     public static function getNavigationLabel(): string
     {

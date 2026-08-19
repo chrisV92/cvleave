@@ -181,6 +181,13 @@
         <circle cx="50" cy="16" r="4.5" fill="#fbbf24"/></svg>';
 @endphp
 
+@php
+    // The product shots are captures of a real interface, so each language
+    // needs its own. Same framing and same dimensions in both, so switching
+    // language does not shift the layout.
+    $shot = fn (string $name) => asset('img/landing/'.$name.(app()->getLocale() === 'en' ? '-en' : '').'.png');
+@endphp
+
 <header>
     <div class="wrap nav">
         <a href="#" class="brand">
@@ -229,9 +236,9 @@
         <div class="hero-visual">
             <figure class="shot" style="margin:0;">
                 <div class="shot-bar"><span></span><span></span><span></span></div>
-                <img src="{{ asset('img/landing/app-dashboard.png') }}"
+                <img src="{{ $shot('app-dashboard') }}"
                      alt="{{ __('Ο πίνακας ελέγχου του CvTech: υπόλοιπα αδειών ανά τύπο και ημερολόγιο ομάδας.') }}"
-                     loading="lazy" width="1150" height="700">
+                     loading="lazy" width="1600" height="786">
             </figure>
         </div>
     </div>
@@ -364,9 +371,9 @@
 
         <figure class="shot" style="margin: 0;">
             <div class="shot-bar"><span></span><span></span><span></span></div>
-            <img src="{{ asset('img/landing/kanban-board.png') }}"
+            <img src="{{ $shot('kanban-board') }}"
                  alt="{{ __('Πίνακας έργου στο CvTech: εργασίες σε στήλες, με προτεραιότητα, προθεσμία και ανάθεση σε κάθε κάρτα.') }}"
-                 loading="lazy" width="1128" height="426">
+                 loading="lazy" width="1278" height="426">
         </figure>
     </div>
 </section>

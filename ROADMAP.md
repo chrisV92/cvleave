@@ -281,8 +281,13 @@ MySQL 8, the calculation changes.
    — the public disk with a storage link would make every file readable by
    anyone holding the URL, and URLs get forwarded. Comments stay editable only
    by their author.
-5. **Documentation** — all three Knowledge Base guides in EL and EN with
-   screenshots, and the landing page stops saying "Σύντομα".
+5. **Documentation** — *done.* All three guides cover the module in EL and EN,
+   with 12 new screenshots, and the landing page no longer advertises task
+   management as coming soon.
+
+   Noted while doing it: the landing page's own copy has never had English
+   translations — it renders Greek regardless of the chosen language. That
+   predates this work and is left as its own item below.
 
 ### Known risks
 
@@ -303,8 +308,14 @@ MySQL 8, the calculation changes.
 - **CI/CD** — tests (`php artisan test`) are run manually; no automated
   pipeline runs them on push/PR yet.
 - **Knowledge Base maintenance** — the in-panel Knowledge Base pages
-  (Employee/Admin guides) must be kept in sync by hand whenever a feature
-  changes — there's no automated check for staleness.
+  (Employee/Admin/Platform guides) must be kept in sync by hand whenever a
+  feature changes — there's no automated check for staleness. The screenshots
+  are taken against a throwaway database seeded for the purpose; note that it
+  shares `cvleave_test` with the suite, so running tests midway wipes it.
+- **Landing page has no English** — every string in `welcome.blade.php` goes
+  through `__()` but none of them are in `lang/en.json`, so the marketing page
+  stays Greek even when the panel is switched to English. Pre-dates the Task
+  Manager work.
 
 ## Status
 
@@ -312,8 +323,9 @@ MySQL 8, the calculation changes.
 invitations, carry-over, impersonation, the platform panel and the three
 Knowledge Base guides are all built.
 
-**Task Manager:** specified, not started. Phase 0 (permission catalogue) is the
-next piece of work.
+**Task Manager:** built. Projects with per-project columns, tasks, custom
+fields the company defines itself, a drag-and-drop board, time tracking,
+attachments and comments — all documented in the guides. Phases 0–5 complete.
 
 **SaaS productization:** the branding and landing page exist; billing,
 self-serve signup, real SMTP, CI/CD and production hosting do not. Nothing here

@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'overview',
-        ids: ['overview', 'dashboard', 'tenants', 'users', 'impersonation', 'impersonation-log', 'access'],
+        ids: ['overview', 'modules', 'dashboard', 'tenants', 'users', 'impersonation', 'impersonation-log', 'access'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -39,12 +39,13 @@
         <x-filament::section heading="{{ __('Γρήγορη Πλοήγηση') }}" icon="heroicon-o-list-bullet">
             <ul class="kb-toc">
                 <li><a href="#overview" :class="active === 'overview' && 'kb-toc-active'">1. {{ __('Τι είναι το Platform Panel') }}</a></li>
-                <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">2. {{ __('Ο Πίνακας Ελέγχου') }}</a></li>
-                <li><a href="#tenants" :class="active === 'tenants' && 'kb-toc-active'">3. {{ __('Δημιουργία Εταιρείας') }}</a></li>
-                <li><a href="#users" :class="active === 'users' && 'kb-toc-active'">4. {{ __('Χρήστες όλων των εταιρειών') }}</a></li>
-                <li><a href="#impersonation" :class="active === 'impersonation' && 'kb-toc-active'">5. {{ __('Είσοδος ως χρήστης') }}</a></li>
-                <li><a href="#impersonation-log" :class="active === 'impersonation-log' && 'kb-toc-active'">6. {{ __('Ιστορικό Impersonation') }}</a></li>
-                <li><a href="#access" :class="active === 'access' && 'kb-toc-active'">7. {{ __('Ποιος έχει πρόσβαση εδώ') }}</a></li>
+                <li><a href="#modules" :class="active === 'modules' && 'kb-toc-active'">2. {{ __('Τι περιλαμβάνει κάθε εταιρεία') }}</a></li>
+                <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">3. {{ __('Ο Πίνακας Ελέγχου') }}</a></li>
+                <li><a href="#tenants" :class="active === 'tenants' && 'kb-toc-active'">4. {{ __('Δημιουργία Εταιρείας') }}</a></li>
+                <li><a href="#users" :class="active === 'users' && 'kb-toc-active'">5. {{ __('Χρήστες όλων των εταιρειών') }}</a></li>
+                <li><a href="#impersonation" :class="active === 'impersonation' && 'kb-toc-active'">6. {{ __('Είσοδος ως χρήστης') }}</a></li>
+                <li><a href="#impersonation-log" :class="active === 'impersonation-log' && 'kb-toc-active'">7. {{ __('Ιστορικό Impersonation') }}</a></li>
+                <li><a href="#access" :class="active === 'access' && 'kb-toc-active'">8. {{ __('Ποιος έχει πρόσβαση εδώ') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -59,6 +60,20 @@
                 <li><strong>{{ __('/platform') }}</strong> — {{ __('αυτό εδώ. Το επίπεδο πάνω από όλα, για εσένα ως ιδιοκτήτη της πλατφόρμας. Βλέπεις όλες τις εταιρείες μαζί.') }}</li>
             </ul>
             <p>{{ __('Ο διαχωρισμός είναι απόλυτος: καμία εταιρεία δεν μπορεί να δει δεδομένα άλλης, ούτε κατά λάθος ούτε αλλάζοντας το URL. Το Platform panel είναι το μοναδικό σημείο απ\' όπου φαίνεται η συνολική εικόνα.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="modules" heading="{{ __('Τι περιλαμβάνει κάθε εταιρεία') }}" icon="heroicon-o-squares-2x2">
+        <div class="kb-section">
+            <p>{{ __('Η πλατφόρμα δεν είναι πια μόνο άδειες. Κάθε εταιρεία παίρνει δύο ενότητες:') }}</p>
+            <ul>
+                <li><strong>{{ __('Άδειες') }}</strong> — {{ __('αιτήσεις, έγκριση, τύποι αδειών με υπολογισμό κατά Α.Ν. 539/1945, μεταφορά υπολοίπου, αναφορές.') }}</li>
+                <li><strong>{{ __('Έργα') }}</strong> — {{ __('έργα με πίνακα kanban, εργασίες, πεδία που ορίζει η ίδια η εταιρεία, χρονομέτρηση, συνημμένα και σχόλια.') }}</li>
+            </ul>
+            <p>{{ __('Και οι δύο είναι απόλυτα διαχωρισμένες ανά εταιρεία, όπως όλα τα υπόλοιπα. Ένα έργο, μια εργασία ή ένα συνημμένο ανήκουν σε μία εταιρεία και δεν φαίνονται πουθενά αλλού.') }}</p>
+            <p>{{ __('Δεν υπάρχει διαχείριση έργων από εδώ: τα έργα τα στήνει κάθε εταιρεία μόνη της. Αν χρειαστεί να δεις τι έχει στήσει μια εταιρεία, χρησιμοποίησε το impersonation — βλέπεις ακριβώς τον πίνακά της.') }}</p>
+            <img src="{{ asset('img/kb/27-project-board.png') }}" class="kb-shot" alt="A company's project board seen through impersonation">
+            <p><strong>{{ __('Προσοχή στα συνημμένα:') }}</strong> {{ __('όσο βρίσκεσαι σε impersonation μπορείς να ανοίξεις αρχεία που ανέβασαν εργαζόμενοι. Ισχύει ό,τι και για τα υπόλοιπα προσωπικά δεδομένα — μόνο για πραγματικό αίτημα υποστήριξης.') }}</p>
         </div>
     </x-filament::section>
 

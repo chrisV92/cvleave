@@ -20,7 +20,7 @@
 <div
     x-data="{
         active: 'first-login',
-        ids: ['first-login', 'dashboard', 'carryover', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account'],
+        ids: ['first-login', 'dashboard', 'carryover', 'submit-request', 'partial-leave', 'your-requests', 'export-report', 'notifications', 'language-account', 'projects', 'board', 'task-details', 'task-activity'],
         init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
@@ -47,6 +47,11 @@
                 <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">7. {{ __('Εξαγωγή & Αναφορά PDF') }}</a></li>
                 <li><a href="#notifications" :class="active === 'notifications' && 'kb-toc-active'">8. {{ __('Ειδοποιήσεις') }}</a></li>
                 <li><a href="#language-account" :class="active === 'language-account' && 'kb-toc-active'">9. {{ __('Γλώσσα και Λογαριασμός') }}</a></li>
+                <li style="margin-top: 10px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: .04em;">{{ __('Έργα') }}</li>
+                <li><a href="#projects" :class="active === 'projects' && 'kb-toc-active'">10. {{ __('Έργα και Εργασίες') }}</a></li>
+                <li><a href="#board" :class="active === 'board' && 'kb-toc-active'">11. {{ __('Ο Πίνακας του Έργου') }}</a></li>
+                <li><a href="#task-details" :class="active === 'task-details' && 'kb-toc-active'">12. {{ __('Τι κρατάει μια εργασία') }}</a></li>
+                <li><a href="#task-activity" :class="active === 'task-activity' && 'kb-toc-active'">13. {{ __('Σχόλια, Αρχεία και Χρονόμετρο') }}</a></li>
             </ul>
         </x-filament::section>
     </nav>
@@ -155,6 +160,51 @@
             <p>{{ __('Δίπλα στο κουδουνάκι ειδοποιήσεων μπορείς να αλλάξεις γλώσσα (Ελληνικά/English) οποιαδήποτε στιγμή.') }}</p>
             <img src="{{ asset('img/kb/04-language-switcher.png') }}" class="kb-shot" alt="Language switcher">
             <p>{{ __('Από το μενού του λογαριασμού σου (πάνω δεξιά) μπορείς να επεξεργαστείς το προφίλ σου (όνομα, email, password). Αν ξεχάσεις τον κωδικό σου, χρησιμοποίησε το "Ξεχάσατε τον κωδικό σας;" στη σελίδα σύνδεσης.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="projects" heading="{{ __('Έργα και Εργασίες') }}" icon="heroicon-o-folder">
+        <div class="kb-section">
+            <p>{{ __('Πέρα από τις άδειες, η εφαρμογή κρατάει και τη δουλειά της εταιρείας σου: έργα, και μέσα σε αυτά εργασίες.') }}</p>
+            <p>{{ __('Στο μενού "Έργα" βλέπεις όλα τα έργα της εταιρείας. Δεν τα δημιουργείς εσύ — αυτό το κάνει ο διαχειριστής — αλλά βλέπεις όσα υπάρχουν και δουλεύεις μέσα τους.') }}</p>
+            <img src="{{ asset('img/kb/26-projects-list.png') }}" class="kb-shot" alt="Projects list">
+            <p>{{ __('Στο μενού "Εργασίες" βλέπεις όλες τις εργασίες μαζί, από όλα τα έργα. Είναι ο πιο γρήγορος τρόπος να βρεις τι έχει ανατεθεί σε σένα: φιλτράρεις στη στήλη "Ανάθεση" με το όνομά σου.') }}</p>
+            <img src="{{ asset('img/kb/33-tasks-table.png') }}" class="kb-shot" alt="Tasks list with filters">
+            <p>{{ __('Μπορείς να δημιουργήσεις εργασία, να την επεξεργαστείς και να τη μετακινήσεις. Αυτό που δεν μπορείς είναι να φτιάξεις νέο έργο ή να αλλάξεις τις στήλες του.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="board" heading="{{ __('Ο Πίνακας του Έργου') }}" icon="heroicon-o-view-columns">
+        <div class="kb-section">
+            <p>{{ __('Πατώντας ένα έργο ανοίγει ο πίνακάς του — οι εργασίες σε στήλες, ανάλογα με το πού βρίσκονται.') }}</p>
+            <img src="{{ asset('img/kb/27-project-board.png') }}" class="kb-shot" alt="Project board">
+            <p><strong>{{ __('Σύρε μια κάρτα') }}</strong> {{ __('από στήλη σε στήλη για να αλλάξεις την κατάστασή της, ή πάνω-κάτω μέσα στην ίδια στήλη για να αλλάξεις σειρά. Η αλλαγή αποθηκεύεται αμέσως — δεν υπάρχει κουμπί αποθήκευσης.') }}</p>
+            <p>{{ __('Πατώντας μια κάρτα ανοίγει η εργασία για επεξεργασία.') }}</p>
+            <p><strong>{{ __('Οι στήλες δεν είναι ίδιες παντού.') }}</strong> {{ __('Κάθε έργο έχει τις δικές του, γιατί μια ομάδα πωλήσεων και μια ομάδα ανάπτυξης δεν δουλεύουν με τα ίδια στάδια.') }}</p>
+            <img src="{{ asset('img/kb/28-project-board-custom-columns.png') }}" class="kb-shot" alt="A board with its own columns">
+            <p>{{ __('Όταν μια κάρτα φτάσει στη στήλη που η εταιρεία έχει ορίσει ως "ολοκληρωμένη", η εργασία σημειώνεται αυτόματα ως ολοκληρωμένη. Αν την τραβήξεις πίσω, η σήμανση αφαιρείται.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="task-details" heading="{{ __('Τι κρατάει μια εργασία') }}" icon="heroicon-o-clipboard-document">
+        <div class="kb-section">
+            <p>{{ __('Ανοίγοντας μια εργασία βρίσκεις τα βασικά — τίτλος, έργο, στήλη, ανάθεση, προτεραιότητα, ημερομηνίες, περιγραφή.') }}</p>
+            <img src="{{ asset('img/kb/34-task-form.png') }}" class="kb-shot" alt="Task form with additional fields">
+            <p><strong>{{ __('Πρόσθετα Πεδία:') }}</strong> {{ __('από κάτω μπορεί να υπάρχουν πεδία που έφτιαξε η εταιρεία σου — π.χ. εκτίμηση ωρών, ομάδα, αξία συμβολαίου. Ποια εμφανίζονται εξαρτάται από το έργο, οπότε αν αλλάξεις έργο αλλάζουν και τα πεδία. Όσα έχουν αστερίσκο είναι υποχρεωτικά.') }}</p>
+            <p>{{ __('Στο κάτω μέρος της σελίδας υπάρχουν καρτέλες για τα σχόλια, τα συνημμένα και τον χρόνο.') }}</p>
+        </div>
+    </x-filament::section>
+
+    <x-filament::section id="task-activity" heading="{{ __('Σχόλια, Αρχεία και Χρονόμετρο') }}" icon="heroicon-o-clock">
+        <div class="kb-section">
+            <p><strong>{{ __('Σχόλια') }}</strong> — {{ __('γράφεις ό,τι χρειάζεται να ξέρει η ομάδα για την εργασία. Μπορείς να επεξεργαστείς ή να σβήσεις μόνο τα δικά σου.') }}</p>
+            <img src="{{ asset('img/kb/35-task-comments.png') }}" class="kb-shot" alt="Task with comments and attachments">
+            <p><strong>{{ __('Συνημμένα') }}</strong> — {{ __('ανεβάζεις αρχεία και εικόνες. Οι εικόνες δείχνουν μικρογραφία, και με το "Άνοιγμα" κατεβάζεις ή βλέπεις το αρχείο.') }}</p>
+            <p>{{ __('Τα αρχεία δεν είναι δημόσια: ακόμα και με τον σύνδεσμο, τα βλέπει μόνο κάποιος συνδεδεμένος στη δική σου εταιρεία.') }}</p>
+            <p><strong>{{ __('Χρονόμετρο') }}</strong> — {{ __('αν το έργο το έχει ενεργοποιημένο, πάνω δεξιά υπάρχει "Έναρξη χρονομέτρησης". Πατάς όταν ξεκινάς, "Διακοπή" όταν σταματάς, και ο χρόνος καταγράφεται.') }}</p>
+            <img src="{{ asset('img/kb/36-task-time-log.png') }}" class="kb-shot" alt="Time log for a task">
+            <p><strong>{{ __('Ένα χρονόμετρο τη φορά:') }}</strong> {{ __('αν ξεκινήσεις χρονόμετρο σε άλλη εργασία, το προηγούμενο σταματάει μόνο του και η εφαρμογή σου το λέει. Δεν μπορείς να χρεώνεις δύο εργασίες ταυτόχρονα.') }}</p>
+            <p>{{ __('Στην καρτέλα "Καταγραφή Χρόνου" βλέπεις ποιος δούλεψε πότε και για πόσο. Μπορείς να σβήσεις μόνο τις δικές σου εγγραφές.') }}</p>
         </div>
     </x-filament::section>
 

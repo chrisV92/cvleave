@@ -6,6 +6,7 @@ use App\Filament\Resources\Projects\ProjectResource;
 use App\Models\CustomField;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Services\CustomFieldSchema;
 use App\Services\TaskPosition;
 use App\Support\Permissions;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
@@ -73,15 +74,13 @@ class ProjectBoard extends Page
         return $task->customFieldValues
             ->filter(fn ($value) => $value->customField !== null)
             ->take(2)
+            // Formatted through the same helper the table uses, so an amount
+            // does not read one way on a card and another in a list.
             ->map(fn ($value) => [
                 'label' => $value->customField->name,
-                'value' => $value->value(),
+                'value' => CustomFieldSchema::format($value->customField, $value->value()),
             ])
-            ->filter(fn (array $field) => $field['value'] !== null && $field['value'] !== [])
-            ->map(fn (array $field) => [
-                'label' => $field['label'],
-                'value' => is_array($field['value']) ? implode(', ', $field['value']) : (string) $field['value'],
-            ])
+            ->filter(fn (array $field) => filled($field['value']))
             ->values()
             ->all();
     }

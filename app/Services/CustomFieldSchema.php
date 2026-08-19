@@ -145,8 +145,18 @@ class CustomFieldSchema
 
     protected static function displayValue(Task $task, CustomField $field): ?string
     {
-        $value = static::valueFor($task, $field);
+        return static::format($field, static::valueFor($task, $field));
+    }
 
+    /**
+     * A stored value as a person should read it.
+     *
+     * Public because the board card needs exactly the same answer as the
+     * table — an amount that reads as 18.500,00 € in one place and 18500 in
+     * the other is the sort of thing that makes people distrust the numbers.
+     */
+    public static function format(CustomField $field, mixed $value): ?string
+    {
         if ($value === null || $value === [] || $value === '') {
             return null;
         }
@@ -154,7 +164,7 @@ class CustomFieldSchema
         return match ($field->type) {
             CustomFieldType::MultiSelect => implode(', ', (array) $value),
             CustomFieldType::Percent => $value.'%',
-            CustomFieldType::Money => ($field->options['currency'] ?? '€').number_format((float) $value, 2),
+            CustomFieldType::Money => number_format((float) $value, 2, ',', '.').' '.($field->options['currency'] ?? '€'),
             CustomFieldType::User => User::find($value)?->name,
             CustomFieldType::Date => Carbon::parse($value)->format('d/m/Y'),
             default => (string) $value,

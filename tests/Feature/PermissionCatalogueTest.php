@@ -36,16 +36,29 @@ it('creates every catalogue permission exactly once, globally', function () {
     }
 });
 
-it('gives a new company an admin holding every permission and an employee holding none', function () {
+it('gives a new company an admin holding every permission', function () {
     $tenant = Tenant::factory()->create();
-
     $admin = makeUser($tenant, 'admin');
-    $employee = makeUser($tenant, 'employee');
 
     foreach (Permissions::all() as $name) {
         expect($admin->can($name))->toBeTrue("admin should have {$name}");
-        expect($employee->can($name))->toBeFalse("employee should not have {$name}");
     }
+});
+
+it('gives a new company an employee who can work on tasks but not manage the company', function () {
+    $tenant = Tenant::factory()->create();
+    $employee = makeUser($tenant, 'employee');
+
+    $granted = Permissions::roleBundles()['employee'];
+
+    foreach (Permissions::all() as $name) {
+        expect($employee->can($name))->toBe(
+            in_array($name, $granted, true),
+            "employee permission mismatch for {$name}",
+        );
+    }
+
+    expect($employee->managesCompany())->toBeFalse();
 });
 
 it('scopes permissions to the company the user belongs to', function () {

@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Spatie\Permission\PermissionRegistrar;
@@ -20,6 +21,16 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Filament's manager keeps the current panel and tenant in memory, and
+        // nothing resets them between tests the way a new request would. Left
+        // over, they are not merely stale context: the tenancy observer
+        // *overwrites* tenant_id on every record created while a tenant is
+        // current, so a factory call at the top of one test would silently be
+        // stamped with the previous test's company.
+        Filament::setCurrentPanel(null);
+        Filament::setTenant(null, isQuiet: true);
+    })
     ->in('Feature');
 
 pest()->extend(TestCase::class)
@@ -74,11 +85,25 @@ function actingInTenant(User $user): User
 {
     test()->actingAs($user);
 
-    // Setting the current panel matters: Filament's tenancy global scope is a
-    // no-op unless the panel it was registered for is the current one, so
-    // without this the tests would silently see across tenants where a real
-    // request would not.
-    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    // Booting the panel is what registers Filament's tenancy global scope and
+    // the observer that stamps tenant_id on new records. A real request gets
+    // that from the panel middleware; a Livewire test does not, and without it
+    // every resource query runs completely unscoped — isolation tests would
+    // pass only because nothing was scoped in either direction.
+    //
+    // It has to happen on every call, not once: each test builds a fresh
+    // container and therefore a fresh Panel instance, while global scopes live
+    // on the model classes and survive. The scope closure compares the current
+    // panel against the instance it captured, so a scope registered in an
+    // earlier test silently does nothing in this one. Clearing the booted
+    // models drops those stale registrations so they rebind to this test's
+    // panel.
+    Model::clearBootedModels();
+
+    $panel = Filament::getPanel('admin');
+    $panel->boot();
+
+    Filament::setCurrentPanel($panel);
     Filament::setTenant($user->tenant, isQuiet: true);
     app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
 

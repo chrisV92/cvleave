@@ -56,12 +56,51 @@ class Tenant extends Model
         return $this->hasMany(LeaveType::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function taskStatuses(): HasMany
+    {
+        return $this->hasMany(TaskStatus::class);
+    }
+
     protected static function booted(): void
     {
         static::created(function (Tenant $tenant) {
             $tenant->seedDefaultLeaveTypes();
+            $tenant->seedDefaultTaskStatuses();
             $tenant->seedDefaultRoles();
         });
+    }
+
+    /**
+     * The company's board columns, which every new project starts from.
+     *
+     * These are templates (no project_id); each project copies them, so a
+     * company can keep a house standard while individual boards diverge.
+     */
+    public function seedDefaultTaskStatuses(): void
+    {
+        $defaults = [
+            ['name' => 'Νέο', 'color' => '#94a3b8', 'is_default' => true],
+            ['name' => 'Σε εξέλιξη', 'color' => '#3b82f6'],
+            ['name' => 'Σε έλεγχο', 'color' => '#f59e0b'],
+            ['name' => 'Ολοκληρώθηκε', 'color' => '#22c55e', 'is_completed' => true],
+        ];
+
+        foreach ($defaults as $position => $status) {
+            $this->taskStatuses()->updateOrCreate(
+                ['project_id' => null, 'name' => $status['name']],
+                [
+                    'color' => $status['color'],
+                    'position' => $position,
+                    'is_default' => $status['is_default'] ?? false,
+                    'is_completed' => $status['is_completed'] ?? false,
+                ]
+            );
+        }
     }
 
     public function seedDefaultRoles(): void

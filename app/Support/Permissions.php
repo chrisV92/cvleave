@@ -39,6 +39,15 @@ class Permissions
     /** Edit company settings, including the carry-over deadline. */
     public const COMPANY_SETTINGS = 'company.settings';
 
+    /** See the company's projects and the work on their boards. */
+    public const TASKS_VIEW = 'tasks.view';
+
+    /** Create and edit tasks, and move them between columns. */
+    public const TASKS_MANAGE = 'tasks.manage';
+
+    /** Create and archive projects, and define their columns. */
+    public const PROJECTS_MANAGE = 'projects.manage';
+
     /**
      * Every permission the application knows about.
      *
@@ -54,17 +63,25 @@ class Permissions
             self::USERS_MANAGE,
             self::LEAVE_TYPES_MANAGE,
             self::COMPANY_SETTINGS,
+            self::TASKS_VIEW,
+            self::TASKS_MANAGE,
+            self::PROJECTS_MANAGE,
         ];
     }
 
     /**
      * Permissions granted to each role a new company starts with.
      *
-     * `employee` is deliberately empty. Everything an employee does today —
-     * filing their own leave, editing it while it is pending, downloading their
-     * own report — is the ungated default, not a permission. Introducing
-     * `leave.request` here would mean gating behaviour that is currently open
-     * to everyone, which is a change in behaviour rather than a refactor.
+     * `employee` carries no *leave* permissions. Everything an employee does
+     * there — filing their own leave, editing it while it is pending,
+     * downloading their own report — is the ungated default rather than a
+     * permission, and gating it now would change behaviour rather than
+     * refactor it.
+     *
+     * Tasks are different: the feature is new, so its defaults are a design
+     * decision rather than a migration. Everyone in the company can see the
+     * boards and work on them; only admins create projects and decide what
+     * columns exist.
      *
      * @return array<string, list<string>>
      */
@@ -72,7 +89,10 @@ class Permissions
     {
         return [
             'admin' => self::all(),
-            'employee' => [],
+            'employee' => [
+                self::TASKS_VIEW,
+                self::TASKS_MANAGE,
+            ],
         ];
     }
 
@@ -115,6 +135,7 @@ class Permissions
             self::USERS_MANAGE,
             self::LEAVE_TYPES_MANAGE,
             self::COMPANY_SETTINGS,
+            self::PROJECTS_MANAGE,
         ];
     }
 }

@@ -31,13 +31,6 @@
 
 @php
     $canMove = $this->canMove();
-    $priorities = \App\Models\Task::priorities();
-    $priorityColour = [
-        'urgent' => ['#fee2e2', '#b91c1c'],
-        'high' => ['#fef3c7', '#b45309'],
-        'normal' => ['#dbeafe', '#1d4ed8'],
-        'low' => ['#f4f4f5', '#52525b'],
-    ];
 @endphp
 
 {{-- Careful: this whole expression lives inside a double-quoted HTML
@@ -72,7 +65,12 @@
                     // item too, and dropping next to it sends a neighbour id
                     // of NaN to the server.
                     draggable: '[data-task]',
+                    onStart: () => { this.dragging = true; },
                     onEnd: (event) => {
+                        // SortableJS fires a click on the card it just dropped.
+                        // Without this, every drag would also open the panel.
+                        setTimeout(() => { this.dragging = false; }, 80);
+
                         const card = event.item;
                         const list = event.to;
 
@@ -94,6 +92,42 @@
                     },
                 });
             });
+        },
+
+        /** Whether a drag is in flight, so its trailing click is ignored. */
+        dragging: false,
+
+        /** Open the edit panel for a card. */
+        open(taskId) {
+            if (this.dragging) return;
+
+            $wire.mountAction('editTask', { task: taskId });
+        },
+
+        /**
+         * Swap in the card the server just re-rendered.
+         *
+         * The board is wire:ignore'd so a save never repaints it; this patches
+         * the one card that changed, and moves it if its column did.
+         */
+        applyUpdate({ id, columnId, html }) {
+            const card = this.$el.querySelector(`[data-task='${id}']`);
+            if (! card) return;
+
+            const from = card.closest('[data-column]');
+            const target = this.$el.querySelector(`[data-column='${columnId}']`);
+
+            const holder = document.createElement('div');
+            holder.innerHTML = html.trim();
+            const fresh = holder.firstElementChild;
+
+            card.replaceWith(fresh);
+
+            if (target && from !== target) {
+                target.appendChild(fresh);
+                this.refresh(from);
+                this.refresh(target);
+            }
         },
 
         /** The id of the nearest sibling that is actually a card. */
@@ -124,6 +158,7 @@
             }
         },
     }"
+    x-on:board-card-updated.window="applyUpdate($event.detail)"
     class="kb-board"
     wire:ignore
 >
@@ -137,37 +172,11 @@
 
             <div class="kb-list" data-column="{{ $column->id }}">
                 @foreach ($this->tasksFor($column) as $task)
-                    <a
-                        href="{{ \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task]) }}"
-                        class="kb-card {{ $canMove ? 'kb-movable' : '' }}"
-                        data-task="{{ $task->id }}"
-                    >
-                        <div class="kb-title">{{ $task->title }}</div>
-
-                        @foreach ($this->cardFields($task) as $field)
-                            <div class="kb-field">{{ $field['label'] }}: <strong>{{ $field['value'] }}</strong></div>
-                        @endforeach
-
-                        <div class="kb-meta">
-                            @if ($task->priority)
-                                @php([$bg, $fg] = $priorityColour[$task->priority] ?? ['#f4f4f5', '#52525b'])
-                                <span class="kb-badge" style="background: {{ $bg }}; color: {{ $fg }}">
-                                    {{ $priorities[$task->priority] ?? $task->priority }}
-                                </span>
-                            @endif
-
-                            @if ($task->due_date)
-                                <span class="kb-badge {{ $task->isOverdue() ? 'kb-due-late' : '' }}"
-                                      style="background: transparent; padding-left: 0">
-                                    {{ $task->due_date->format('d/m') }}
-                                </span>
-                            @endif
-
-                            @if ($task->assignee)
-                                <span class="kb-who">{{ $task->assignee->name }}</span>
-                            @endif
-                        </div>
-                    </a>
+                    @include('filament.resources.projects.pages.partials.board-card', [
+                        'task' => $task,
+                        'fields' => $this->cardFields($task),
+                        'canMove' => $canMove,
+                    ])
                 @endforeach
 
                 <div class="kb-empty" @style(['display: none' => $column->tasks_count > 0])>
@@ -177,4 +186,7 @@
         </div>
     @endforeach
 </div>
+
+{{-- Renders the slide-over the cards mount. --}}
+<x-filament-actions::modals />
 </x-filament-panels::page>

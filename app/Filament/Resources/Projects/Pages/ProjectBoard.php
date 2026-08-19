@@ -3,14 +3,19 @@
 namespace App\Filament\Resources\Projects\Pages;
 
 use App\Filament\Resources\Projects\ProjectResource;
+use App\Filament\Resources\Projects\Schemas\BoardTaskForm;
+use App\Filament\Resources\Tasks\TaskResource;
 use App\Models\CustomField;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Services\CustomFieldSchema;
 use App\Services\TaskPosition;
 use App\Support\Permissions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
+use Filament\Support\Enums\SlideOverPosition;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +88,108 @@ class ProjectBoard extends Page
             ->filter(fn (array $field) => filled($field['value']))
             ->values()
             ->all();
+    }
+
+    /**
+     * Editing a card without leaving the board.
+     *
+     * A panel rather than a page: the board is the context — which column a
+     * task sits in, what is beside it — and navigating away loses it, along
+     * with the scroll position on a wide board.
+     *
+     * The full page is still one click away, because comments, attachments and
+     * the time log are relation managers and cannot live inside an action.
+     */
+    public function editTaskAction(): Action
+    {
+        return Action::make('editTask')
+            ->slideOver()
+            ->slideOverPosition(SlideOverPosition::Start)
+            ->modalWidth(Width::Medium)
+            ->modalHeading(fn (array $arguments) => $this->resolveTask($arguments)?->title)
+            ->modalSubmitActionLabel(__('Αποθήκευση'))
+            ->fillForm(function (array $arguments): array {
+                $task = $this->resolveTask($arguments);
+
+                if (! $task) {
+                    return [];
+                }
+
+                return [
+                    'title' => $task->title,
+                    'task_status_id' => $task->task_status_id,
+                    'assignee_id' => $task->assignee_id,
+                    'priority' => $task->priority,
+                    'start_date' => $task->start_date,
+                    'due_date' => $task->due_date,
+                    'description' => $task->description,
+                    CustomFieldSchema::STATE_KEY => $task->customFieldState(),
+                ];
+            })
+            ->schema(fn (array $arguments) => BoardTaskForm::components(
+                $this->getRecord(),
+                $this->resolveTask($arguments),
+            ))
+            ->extraModalFooterActions(fn (array $arguments) => [
+                Action::make('openFullPage')
+                    ->label(__('Πλήρης σελίδα'))
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn () => ($task = $this->resolveTask($arguments))
+                        ? TaskResource::getUrl('edit', ['record' => $task])
+                        : null),
+            ])
+            ->action(function (array $arguments, array $data): void {
+                $task = $this->resolveTask($arguments);
+
+                abort_unless($task && TaskResource::canEdit($task), 403);
+
+                $custom = $data[CustomFieldSchema::STATE_KEY] ?? [];
+                unset($data[CustomFieldSchema::STATE_KEY]);
+
+                // The column belongs to this project or it does not exist —
+                // the same rule the drag handler applies.
+                abort_unless(
+                    $this->getRecord()->statuses()->whereKey($data['task_status_id'])->exists(),
+                    404,
+                );
+
+                $task->update($data);
+                $task->saveCustomFieldState($custom);
+
+                $this->refreshCard($task->refresh());
+            });
+    }
+
+    protected function resolveTask(array $arguments): ?Task
+    {
+        // Looked up through the project, so an id from another board — or
+        // another company — resolves to nothing.
+        return $this->getRecord()->tasks()->whereKey($arguments['task'] ?? null)->first();
+    }
+
+    /**
+     * Hand the browser the freshly rendered card.
+     *
+     * The board carries wire:ignore so that dragging stays instant, which also
+     * means Livewire will never repaint it. Rendering the one card that
+     * changed on the server keeps the markup in one place instead of rebuilding
+     * it in JavaScript.
+     */
+    protected function refreshCard(Task $task): void
+    {
+        $task->load(['assignee', 'customFieldValues.customField']);
+
+        $this->dispatch(
+            'board-card-updated',
+            id: $task->id,
+            columnId: $task->task_status_id,
+            html: view('filament.resources.projects.pages.partials.board-card', [
+                'task' => $task,
+                'fields' => $this->cardFields($task),
+                'canMove' => $this->canMove(),
+            ])->render(),
+        );
     }
 
     public function canMove(): bool

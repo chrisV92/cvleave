@@ -1,11 +1,13 @@
 <?php
 
 use App\Filament\Resources\Projects\Pages\ProjectBoard;
+use App\Models\CustomField;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\CustomFieldSchema;
 use App\Services\TaskPosition;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Features\SupportTesting\Testable;
@@ -163,4 +165,86 @@ it('keeps an employee from opening another company\'s board', function () {
     // Filament's tenant scoping means the record cannot even be resolved.
     expect(fn () => board($theirProject))
         ->toThrow(ModelNotFoundException::class);
+});
+
+it('edits a card from the board without leaving it', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $review = $project->statuses()->where('name', 'Σε έλεγχο')->first();
+    $task = Task::factory()->forProject($project)->create(['title' => 'Πριν']);
+
+    $field = CustomField::factory()->create(['tenant_id' => $tenant->id, 'key' => 'notes', 'name' => 'Σημείωση']);
+    $assignee = User::factory()->for($tenant)->create();
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    board($project)->callAction('editTask', [
+        'title' => 'Μετά',
+        'task_status_id' => $review->id,
+        'assignee_id' => $assignee->id,
+        'priority' => Task::PRIORITY_HIGH,
+        CustomFieldSchema::STATE_KEY => [$field->id => 'μια σημείωση'],
+    ], ['task' => $task->id]);
+
+    $task->refresh();
+
+    expect($task->title)->toBe('Μετά')
+        ->and($task->task_status_id)->toBe($review->id)
+        ->and($task->assignee_id)->toBe($assignee->id)
+        ->and($task->customFieldState()[$field->id])->toBe('μια σημείωση');
+});
+
+it('hands the browser a freshly rendered card after an edit', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $task = Task::factory()->forProject($project)->create(['title' => 'Παλιός τίτλος']);
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    // The board is wire:ignore'd, so a save can never repaint it — the card
+    // markup has to come back over the wire or the panel would close onto a
+    // stale card.
+    board($project)
+        ->callAction('editTask', [
+            'title' => 'Νέος τίτλος',
+            'task_status_id' => $task->task_status_id,
+        ], ['task' => $task->id])
+        ->assertDispatched('board-card-updated', fn (string $event, array $data) => $data['id'] === $task->id
+            && str_contains($data['html'], 'Νέος τίτλος'));
+});
+
+it('refuses to edit a card belonging to another project', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $elsewhere = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $theirTask = Task::factory()->forProject($elsewhere)->create(['title' => 'Ξένη']);
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    board($project)->callAction('editTask', [
+        'title' => 'Αλλαγμένη',
+        'task_status_id' => $project->defaultStatus()->id,
+    ], ['task' => $theirTask->id])->assertStatus(403);
+
+    expect($theirTask->fresh()->title)->toBe('Ξένη');
+});
+
+it('refuses a column from another project when saving the panel', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $elsewhere = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $task = Task::factory()->forProject($project)->create(['title' => 'Δική μου']);
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    // Two things stop this. The column select only offers this project's
+    // statuses, so validation rejects it first; behind that the action aborts
+    // outright, for a submission that skips the form. The assertion is on the
+    // outcome rather than on which layer caught it.
+    board($project)->callAction('editTask', [
+        'title' => 'Δική μου',
+        'task_status_id' => $elsewhere->defaultStatus()->id,
+    ], ['task' => $task->id])->assertHasActionErrors(['task_status_id']);
+
+    expect($task->fresh()->task_status_id)->not->toBe($elsewhere->defaultStatus()->id);
 });

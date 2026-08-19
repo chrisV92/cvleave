@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Projects\Tables;
 
+use App\Filament\Resources\Projects\ProjectResource;
 use App\Models\Project;
 use App\Support\Permissions;
 use Filament\Actions\Action;
@@ -68,7 +69,15 @@ class ProjectsTable
                         blank: fn (Builder $query) => $query->whereNull('archived_at'),
                     ),
             ])
+            // The board is what people actually come here for, so a row click
+            // opens it rather than the settings form.
+            ->recordUrl(fn (Project $record) => ProjectResource::getUrl('board', ['record' => $record]))
             ->recordActions([
+                Action::make('board')
+                    ->label(__('Πίνακας'))
+                    ->icon('heroicon-o-view-columns')
+                    ->url(fn (Project $record) => ProjectResource::getUrl('board', ['record' => $record])),
+
                 EditAction::make()
                     ->visible($canManage),
 

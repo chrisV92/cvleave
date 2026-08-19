@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Projects;
 use App\Filament\Resources\Projects\Pages\CreateProject;
 use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Filament\Resources\Projects\Pages\ListProjects;
+use App\Filament\Resources\Projects\Pages\ProjectBoard;
 use App\Filament\Resources\Projects\RelationManagers\CustomFieldsRelationManager;
 use App\Filament\Resources\Projects\RelationManagers\StatusesRelationManager;
 use App\Filament\Resources\Projects\Schemas\ProjectForm;
@@ -97,6 +98,7 @@ class ProjectResource extends Resource
             'index' => ListProjects::route('/'),
             'create' => CreateProject::route('/create'),
             'edit' => EditProject::route('/{record}/edit'),
+            'board' => ProjectBoard::route('/{record}/board'),
         ];
     }
 }

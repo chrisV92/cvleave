@@ -251,8 +251,24 @@ MySQL 8, the calculation changes.
    input or a table column. Writes are filtered through the fields that
    actually apply to the task's project, so a crafted submission cannot attach
    another board's — or another company's — field.
-3. **Kanban board** — starting with a spike to confirm Flowforge accepts
-   dynamic columns before anything depends on it. Public docs are thin.
+3. **Kanban board** — *done, and not with Flowforge.* The spike found the
+   blocker: the package registers only a JS asset and ships no CSS, so its
+   views depend on the host application's Tailwind build scanning them
+   (`@source` in a custom Filament theme). This project ships no compiled
+   assets at all, and Vite 8 needs Node 20+ against the 18 on the machine —
+   so adopting it meant a Node upgrade plus a build step on every deploy,
+   permanently, for one feature.
+
+   Built by hand instead: SortableJS vendored as a plain file in `public/js`,
+   Alpine (already present), and self-contained CSS. `App\Services\TaskPosition`
+   does the fractional ranking — midpoint between neighbours, renumber the
+   column when the gap gets too small. Worth noting Flowforge's own column is
+   `decimal(20,10)`, exactly what the schema already had.
+
+   The drop endpoint resolves both the card and the target column *through the
+   project*, so an id from another board or another company cannot be moved
+   into place — the package's own handler writes the incoming column id
+   unvalidated, so this guard would have been needed either way.
 4. **Timer, attachments, comments.**
 5. **Documentation** — all three Knowledge Base guides in EL and EN with
    screenshots, and the landing page stops saying "Σύντομα".

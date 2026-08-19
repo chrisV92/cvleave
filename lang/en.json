@@ -461,5 +461,7 @@
     "Σταθερό όνομα για αναφορές και εξαγωγές.": "A stable name for reports and exports.",
     "Ο τύπος δεν αλλάζει μετά τη δημιουργία.": "The type cannot be changed after creation.",
     "Θα διαγραφούν και οι τιμές που έχουν καταχωρηθεί σε αυτό το πεδίο.": "The values already recorded in this field will be deleted too.",
-    "Πρόσθετα Πεδία": "Additional Fields"
+    "Πρόσθετα Πεδία": "Additional Fields",
+    "Πίνακας": "Board",
+    "Καμία εργασία": "No tasks"
 }

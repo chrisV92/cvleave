@@ -45,7 +45,7 @@ class LeaveRequestReviewed extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(__('Η αίτηση άδειάς σου :verb', ['verb' => $verb]))
-            ->view('emails.leave-notification', [
+            ->view('emails.notification', [
                 'title' => __('Η αίτηση άδειάς σου :verb', ['verb' => $verb]),
                 'accent' => $approved ? '#16a34a' : '#dc2626',
                 'accentDark' => $approved ? '#166534' : '#991b1b',

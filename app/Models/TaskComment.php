@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TaskNotifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,13 @@ class TaskComment extends Model
         'user_id',
         'body',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (self $comment) {
+            app(TaskNotifier::class)->commented($comment);
+        });
+    }
 
     public function task(): BelongsTo
     {

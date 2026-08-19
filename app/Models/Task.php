@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasCustomFields;
+use App\Services\TaskNotifier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -51,6 +52,22 @@ class Task extends Model
 
     protected static function booted(): void
     {
+        // Tasks are written from three places — the board, the slide-over and
+        // the full page — so the notifications hang off the model rather than
+        // being repeated in each of them.
+        static::saved(function (self $task) {
+            $actor = auth()->user();
+            $notifier = app(TaskNotifier::class);
+
+            if ($task->wasChanged('assignee_id')) {
+                $notifier->assigned($task, $actor);
+            }
+
+            if ($task->wasChanged('completed_at') && $task->completed_at !== null) {
+                $notifier->completed($task, $actor);
+            }
+        });
+
         // `completed_at` follows the status rather than being set by hand, so
         // that "when was this finished" stays true however the task was moved
         // — through the board, the table, or an import.

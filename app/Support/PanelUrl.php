@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 
 /**
@@ -30,6 +32,18 @@ class PanelUrl
     public static function leaveRequestsForUser(User $user, array $query = []): string
     {
         return static::forUser($user, 'leave-requests', $query);
+    }
+
+    /** The full page of one task. */
+    public static function taskForUser(User $user, Task $task): string
+    {
+        return static::forUser($user, 'tasks/'.$task->getKey().'/edit');
+    }
+
+    /** The board a task lives on, which is usually the more useful landing spot. */
+    public static function boardForUser(User $user, Project $project): string
+    {
+        return static::forUser($user, 'projects/'.$project->getKey().'/board');
     }
 
     public static function dashboardForUser(User $user): string

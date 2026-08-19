@@ -36,7 +36,7 @@ class LeaveEndingSoon extends Notification implements ShouldQueue
 
             return (new MailMessage)
                 ->subject(__('Λήγει η άδεια του/της :name', ['name' => $lr->user->name]))
-                ->view('emails.leave-notification', [
+                ->view('emails.notification', [
                     'title' => __('Λήγει η άδεια του/της :name', ['name' => $lr->user->name]),
                     'accent' => '#0ea5e9',
                     'accentDark' => '#0369a1',
@@ -53,7 +53,7 @@ class LeaveEndingSoon extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(__('Η άδειά σου λήγει σύντομα'))
-            ->view('emails.leave-notification', [
+            ->view('emails.notification', [
                 'title' => __('Η άδειά σου λήγει σύντομα'),
                 'accent' => '#0ea5e9',
                 'accentDark' => '#0369a1',

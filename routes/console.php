@@ -9,3 +9,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('leave:send-reminders')->dailyAt('08:00');
+Schedule::command('tasks:send-reminders')->dailyAt('08:05');
+
+// Monday morning, after the daily run, so a task due today is not announced
+// twice within five minutes.
+Schedule::command('tasks:send-weekly-digest')->weeklyOn(1, '08:15');

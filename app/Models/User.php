@@ -20,7 +20,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'tenant_id', 'hire_date', 'prior_experience_years', 'is_platform_admin'])]
+#[Fillable(['name', 'email', 'password', 'tenant_id', 'hire_date', 'prior_experience_years', 'is_platform_admin', 'notify_by_email', 'notify_weekly_digest'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasTenants
 {
@@ -35,6 +35,20 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public const INVITATION_VALID_FOR_DAYS = 7;
 
     /**
+     * Column defaults repeated on the model.
+     *
+     * A freshly created record does not carry columns the database filled in,
+     * so without these a new user looks like somebody who has turned email
+     * off — and would silently never be written to.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'notify_by_email' => true,
+        'notify_weekly_digest' => true,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -47,6 +61,8 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             'hire_date' => 'date',
             'prior_experience_years' => 'float',
             'is_platform_admin' => 'boolean',
+            'notify_by_email' => 'boolean',
+            'notify_weekly_digest' => 'boolean',
             'invitation_sent_at' => 'datetime',
         ];
     }
@@ -60,6 +76,17 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function isAdmin(): bool
     {
         return $this->hasRole('admin');
+    }
+
+    /**
+     * The channels a notification should reach this person through.
+     *
+     * The bell is never optional — it is the record of what happened. Email
+     * is, because that is the part that interrupts.
+     */
+    public function notificationChannels(): array
+    {
+        return $this->notify_by_email ? ['mail', 'database'] : ['database'];
     }
 
     /**

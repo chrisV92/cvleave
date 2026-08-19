@@ -38,7 +38,7 @@ class UserInvitation extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(__('Πρόσκληση στο CvTech'))
-            ->view('emails.leave-notification', [
+            ->view('emails.notification', [
                 'title' => __('Πρόσκληση στο CvTech'),
                 'accent' => '#4f46e5',
                 'accentDark' => '#4338ca',

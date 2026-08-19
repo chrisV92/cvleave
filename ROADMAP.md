@@ -301,6 +301,33 @@ MySQL 8, the calculation changes.
   `$isScopedToTenant = false` plus a hand-written `whereHas('user', ...)` on
   every query. Not repeating that.
 
+### Notifications
+
+Tasks notify through the same two channels leave already used — the bell and
+email — reusing the shared mail template, `PanelUrl` for tenant-aware links,
+and the existing scheduler.
+
+The rule the design rests on: **nobody is told about their own action**.
+Assign a task to yourself and nothing is sent. Without it people mute the
+channel within a week and then miss the ones that mattered.
+
+- **Instant**: assignment (to the new assignee), completion (to every admin
+  plus whoever raised it), comments (to the assignee and the creator).
+- **Daily 08:05**: due tomorrow, and overdue — but overdue is a standing
+  state, not an event, so it fires once when a task slips and then weekly.
+  Daily would mean twenty-one emails for a task three weeks late.
+- **Monday 08:15**: a digest. Employees get their own open work split by
+  urgency; admins get the company view including *unassigned* tasks, which
+  nobody else is going to notice. Skipped entirely when there is nothing to
+  say.
+
+Email is switchable per user from the profile, in two toggles; the bell is
+not, because it is the record of what happened rather than an interruption.
+
+Worth remembering: `can()` fails closed without a company context, so the
+digest command sets the permissions team id per tenant. Without it the
+command ran happily and sent nothing at all.
+
 ## Near-term feature backlog (not SaaS-related, just "not built yet")
 
 - **Real SMTP provider** — Mailpit is dev-only; production needs a real

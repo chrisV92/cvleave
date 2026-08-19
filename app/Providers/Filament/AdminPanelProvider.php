@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Tenancy\EditCompanySettings;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeamId;
@@ -35,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->tenantProfile(EditCompanySettings::class)
             ->login()
             ->passwordReset()
-            ->profile(isSimple: false)
+            ->profile(EditProfile::class, isSimple: false)
             ->databaseNotifications()
             ->brandLogo(fn () => view('filament.brand'))
             ->brandLogoHeight('30px')

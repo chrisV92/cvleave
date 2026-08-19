@@ -39,7 +39,7 @@ class LeaveRequestSubmitted extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(__('Νέα αίτηση άδειας: :name', ['name' => $lr->user->name]))
-            ->view('emails.leave-notification', [
+            ->view('emails.notification', [
                 'title' => __('Νέα αίτηση άδειας'),
                 'accent' => '#d97706',
                 'accentDark' => '#92400e',

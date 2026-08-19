@@ -30,7 +30,7 @@
 <tr>
 <td class="header" style="background: linear-gradient(135deg, {{ $accent }} 0%, {{ $accentDark }} 100%); padding: 28px 32px; text-align: center;">
 <p class="brand">CvTech</p>
-<p class="tagline">{{ __('Διαχείριση Αδειών') }}</p>
+<p class="tagline">{{ $tagline ?? __('Διαχείριση Εργασιών') }}</p>
 </td>
 </tr>
 
@@ -45,17 +45,21 @@
 </tr>
 
 <tr>
-<td style="padding: 0 32px 28px 32px;">
+<td style="padding: 0 32px 24px 32px;">
+@foreach($sections as $section)
+@continue(empty($section['tasks']))
+<p style="font-size: 12px; font-weight: 700; color: {{ $section['color'] ?? '#a1a1aa' }}; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 6px 0;">{{ $section['label'] }} ({{ count($section['tasks']) }})</p>
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #fafafa; border-radius: 10px;">
-@foreach($details as $label => $value)
+@foreach($section['tasks'] as $row)
 <tr>
-<td style="padding: 14px 20px; {{ ! $loop->last ? 'border-bottom: 1px solid #e4e4e7;' : '' }}">
-<div class="card-label">{{ $label }}</div>
-<div class="card-value">{{ $value }}</div>
+<td style="padding: 12px 20px; {{ ! $loop->last ? 'border-bottom: 1px solid #e4e4e7;' : '' }}">
+<div class="card-value">{{ $row['title'] }}</div>
+<div style="font-size: 12px; color: #a1a1aa; padding-top: 4px;">{{ $row['meta'] }}</div>
 </td>
 </tr>
 @endforeach
 </table>
+@endforeach
 </td>
 </tr>
 
@@ -69,7 +73,7 @@
 
 <tr>
 <td class="footer" align="center" style="padding: 24px 32px; border-top: 1px solid #f0f0f1;">
-<p><strong>CvTech</strong> — {{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
+<p><strong>CvTech</strong> — {{ $footerNote ?? __('Διαχείριση έργων και εργασιών') }}</p>
 <p>{{ config('app.name') }}</p>
 </td>
 </tr>

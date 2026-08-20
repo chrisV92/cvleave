@@ -106,12 +106,17 @@ php artisan db:seed
 That creates the company `Default` with its leave types and roles, and an admin
 `test@example.com` (the password is the factory default, `password`).
 
-**For production**, create a platform administrator instead, then create the
-real companies from the platform panel:
+**For production**, create a platform administrator, then create the real
+companies from the platform panel. `users.tenant_id` is `NOT NULL`, so the
+account has to be attached to a company row even though it never works inside
+one — `migrate` leaves a `Default` company behind for exactly this:
 
 ```bash
 php artisan tinker --execute='
 App\Models\User::create([
+    "tenant_id" => App\Models\Tenant::firstOrCreate(
+        ["slug" => "default"], ["name" => "Default"]
+    )->id,
     "name" => "Your Name",
     "email" => "you@example.com",
     "password" => Hash::make("choose-a-strong-one"),
@@ -119,11 +124,14 @@ App\Models\User::create([
 ]);'
 ```
 
-A platform administrator has no company of their own. They sign in at
-`/platform` and create each company together with its first administrator,
-whose password they set on the form and hand over. From there that
-administrator invites the rest of the company by email, and those people choose
-their own passwords.
+A platform administrator signs in at `/platform`, not `/admin`, and creates each
+company together with its first administrator, whose password they set on the
+form and hand over. From there that administrator invites the rest of the
+company by email, and those people choose their own passwords.
+
+> **Never run `migrate:fresh` against a database that holds real data.** It
+> drops every table first. Use plain `migrate` to apply new migrations to an
+> existing installation.
 
 ### Queue and scheduler
 

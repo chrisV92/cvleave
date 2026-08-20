@@ -351,3 +351,36 @@ it('ignores an upload path that is not on disk', function () {
 
     expect($task->attachments()->count())->toBe(0);
 });
+
+it('confirms a card saved from the board, which no page reload would otherwise show', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+    $task = Task::factory()->forProject($project)->create(['title' => 'Πριν']);
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    // The board carries wire:ignore and repaints a single card over the wire,
+    // so nothing else on screen tells the person the write reached the server.
+    board($project)
+        ->callAction('editTask', [
+            'title' => 'Μετά',
+            'task_status_id' => $task->task_status_id,
+            'priority' => Task::PRIORITY_NORMAL,
+        ], ['task' => $task->id])
+        ->assertNotified(__('Οι αλλαγές αποθηκεύτηκαν'));
+});
+
+it('confirms a card created from the board', function () {
+    $tenant = Tenant::factory()->create();
+    $project = Project::factory()->create(['tenant_id' => $tenant->id]);
+
+    actingInTenant(User::factory()->for($tenant)->admin()->create());
+
+    board($project)
+        ->callAction('createTask', [
+            'title' => 'Καινούρια',
+            'task_status_id' => $project->defaultStatus()->id,
+            'priority' => Task::PRIORITY_NORMAL,
+        ])
+        ->assertNotified(__('Η εργασία δημιουργήθηκε'));
+});

@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
@@ -91,9 +92,19 @@ class ProjectsTable
                     ->color('gray')
                     ->requiresConfirmation()
                     ->visible($canManage)
-                    ->action(fn (Project $record) => $record->update([
-                        'archived_at' => $record->isArchived() ? null : now(),
-                    ])),
+                    ->action(function (Project $record): void {
+                        $wasArchived = $record->isArchived();
+
+                        $record->update(['archived_at' => $wasArchived ? null : now()]);
+
+                        Notification::make()
+                            ->title($wasArchived
+                                ? __('Το έργο επαναφέρθηκε')
+                                : __('Το έργο αρχειοθετήθηκε'))
+                            ->body($record->name)
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -12,6 +12,7 @@ use App\Services\CustomFieldSchema;
 use App\Services\TaskPosition;
 use App\Support\Permissions;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\SlideOverPosition;
@@ -155,6 +156,12 @@ class ProjectBoard extends Page
                 BoardTaskForm::storeAttachments($task, array_values($uploads));
 
                 $this->appendCard($task->refresh());
+
+                Notification::make()
+                    ->title(__('Η εργασία δημιουργήθηκε'))
+                    ->body($task->title)
+                    ->success()
+                    ->send();
             });
     }
 
@@ -249,6 +256,12 @@ class ProjectBoard extends Page
                 BoardTaskForm::storeAttachments($task, array_values($uploads));
 
                 $this->refreshCard($task->refresh());
+
+                Notification::make()
+                    ->title(__('Οι αλλαγές αποθηκεύτηκαν'))
+                    ->body($task->title)
+                    ->success()
+                    ->send();
             });
     }
 

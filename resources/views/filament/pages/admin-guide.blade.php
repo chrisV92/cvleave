@@ -20,6 +20,14 @@
     .kb-toc a { display: block; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: #71717a; font-weight: 600; font-size: 14px; border-left: 3px solid transparent; }
     .kb-toc a:hover { background-color: #fafafa; color: #4f46e5; }
     .kb-toc a.kb-toc-active { background-color: #eef2ff; color: #4f46e5; border-left-color: #6366f1; }
+    /* Section label inside the contents. Sticks to the top of the scrolled
+       list so the reader can always see which half of the guide they are
+       looking at, now that the list scrolls independently of the page. */
+    .kb-toc-group { position: sticky; top: 0; z-index: 1; background-color: #fff;
+                    margin-top: 10px; padding: 6px 12px; font-size: 12px; font-weight: 700;
+                    color: #a1a1aa; text-transform: uppercase; letter-spacing: .04em; }
+    .kb-toc-group:first-child { margin-top: 0; }
+    .dark .kb-toc-group { background-color: #18181b; }
     [id] { scroll-margin-top: 100px; }
     @media (max-width: 900px) {
         .kb-layout { grid-template-columns: 1fr; }
@@ -58,6 +66,7 @@
     <nav class="kb-nav-sticky" style="position: sticky; top: 90px;">
         <x-filament::section heading="{{ __('Γρήγορη Πλοήγηση') }}" icon="heroicon-o-list-bullet">
             <ul class="kb-toc">
+                <li class="kb-toc-group">{{ __('Άδειες') }}</li>
                 <li><a href="#dashboard" :class="active === 'dashboard' && 'kb-toc-active'">1. {{ __('Ο Πίνακας Ελέγχου του Admin') }}</a></li>
                 <li><a href="#approve-reject" :class="active === 'approve-reject' && 'kb-toc-active'">2. {{ __('Έγκριση / Απόρριψη Αιτήσεων') }}</a></li>
                 <li><a href="#manage-users" :class="active === 'manage-users' && 'kb-toc-active'">3. {{ __('Διαχείριση Χρηστών') }}</a></li>
@@ -67,7 +76,7 @@
                 <li><a href="#export-report" :class="active === 'export-report' && 'kb-toc-active'">7. {{ __('Εξαγωγή & Αναφορές PDF') }}</a></li>
                 <li><a href="#balance-override" :class="active === 'balance-override' && 'kb-toc-active'">8. {{ __('Χειροκίνητη Ρύθμιση Υπολοίπου (Override)') }}</a></li>
                 <li><a href="#reminders" :class="active === 'reminders' && 'kb-toc-active'">9. {{ __('Αυτόματες Υπενθυμίσεις') }}</a></li>
-                <li style="margin-top: 10px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: .04em;">{{ __('Έργα') }}</li>
+                <li class="kb-toc-group">{{ __('Έργα') }}</li>
                 <li><a href="#projects-admin" :class="active === 'projects-admin' && 'kb-toc-active'">10. {{ __('Δημιουργία Έργου και Στηλών') }}</a></li>
                 <li><a href="#project-settings" :class="active === 'project-settings' && 'kb-toc-active'">11. {{ __('Χρονομέτρηση και Συνημμένα') }}</a></li>
                 <li><a href="#custom-fields" :class="active === 'custom-fields' && 'kb-toc-active'">12. {{ __('Πεδία που Ορίζεις Εσύ') }}</a></li>

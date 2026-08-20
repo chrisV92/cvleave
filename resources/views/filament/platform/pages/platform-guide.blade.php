@@ -6,7 +6,17 @@
     .kb-section ol, .kb-section ul { line-height: 1.65; margin: 0 0 12px 0; padding-left: 22px; }
     .kb-section ol li, .kb-section ul li { margin-bottom: 6px; }
     .kb-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
-    .kb-toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+    /* The list scrolls on its own, not the page.
+       Without a height limit a long guide pushes its last entries below the
+       fold of a sticky column, and the only way to reach them is to scroll the
+       article to its very end — which defeats the point of a table of contents.
+       The card heading stays put because the limit sits on the list, not the
+       card. */
+    .kb-toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px;
+              max-height: calc(100vh - 240px); overflow-y: auto; overscroll-behavior: contain; }
+    .kb-toc::-webkit-scrollbar { width: 6px; }
+    .kb-toc::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+    .kb-toc { scrollbar-width: thin; scrollbar-color: #d4d4d8 transparent; }
     .kb-toc a { display: block; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: #71717a; font-weight: 600; font-size: 14px; border-left: 3px solid transparent; }
     .kb-toc a:hover { background-color: #fafafa; color: #4f46e5; }
     .kb-toc a.kb-toc-active { background-color: #eef2ff; color: #4f46e5; border-left-color: #6366f1; }
@@ -14,6 +24,8 @@
     @media (max-width: 900px) {
         .kb-layout { grid-template-columns: 1fr; }
         .kb-nav-sticky { position: static !important; }
+        /* Stacked above the article, the list has the whole page to use. */
+        .kb-toc { max-height: none; overflow-y: visible; }
     }
 </style>
 
@@ -30,6 +42,14 @@
             this.ids.forEach((id) => {
                 const el = document.getElementById(id);
                 if (el) observer.observe(el);
+            });
+
+            // Keep the highlighted entry inside the scrolled list, or the
+            // reader loses their place in exactly the guides long enough to
+            // need scrolling. 'nearest' moves it the least amount possible.
+            this.$watch('active', (id) => {
+                const link = this.$root.querySelector('.kb-toc a[href=\'#' + id + '\']');
+                if (link) link.scrollIntoView({ block: 'nearest' });
             });
         },
     }"

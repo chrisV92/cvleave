@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Πρόσκληση στο CvTech') }}</title>
+    <title>{{ __('Πρόσκληση στο CVCorp') }}</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -30,7 +30,7 @@
 </head>
 <body>
 <div class="card">
-    <p class="brand">CvTech</p>
+    <p class="brand">CVCorp</p>
     <p class="tagline">{{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
 
     @if ($invalid)

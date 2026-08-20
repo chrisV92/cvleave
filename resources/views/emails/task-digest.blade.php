@@ -29,7 +29,7 @@
 
 <tr>
 <td class="header" style="background: linear-gradient(135deg, {{ $accent }} 0%, {{ $accentDark }} 100%); padding: 28px 32px; text-align: center;">
-<p class="brand">CvTech</p>
+<p class="brand">CVCorp</p>
 <p class="tagline">{{ $tagline ?? __('Διαχείριση Εργασιών') }}</p>
 </td>
 </tr>
@@ -73,7 +73,7 @@
 
 <tr>
 <td class="footer" align="center" style="padding: 24px 32px; border-top: 1px solid #f0f0f1;">
-<p><strong>CvTech</strong> — {{ $footerNote ?? __('Διαχείριση έργων και εργασιών') }}</p>
+<p><strong>CVCorp</strong> — {{ $footerNote ?? __('Διαχείριση έργων και εργασιών') }}</p>
 <p>{{ config('app.name') }}</p>
 </td>
 </tr>

@@ -1,15 +1,15 @@
-# CvTech — Future Directions
+# CVCorp — Future Directions
 
 Notes below capture the conversations about turning this into a sellable SaaS
 product, kept here so the context isn't lost.
 
-The product is branded **CvTech** as of August 2026, deliberately named for a
+The product is branded **CVCorp** as of August 2026, deliberately named for a
 company rather than for leave management — the Task Manager specified below is
 the second module, and there may be more.
 
 ## Naming ideas considered
 
-Settled on **CvTech**. Earlier candidates, kept for the record: Ferio (from
+Settled on **CVCorp**. Earlier candidates, kept for the record: Ferio (from
 "feriae" = holidays), Αδειολόγιο, LeaveIQ, OffDuty, TimeOff HQ, and a later
 round aimed at a company-level name — Meltemi, Stoa, Argo, Delos, Pleiada,
 Talos, Daidalos, Metron.
@@ -171,7 +171,7 @@ drag & drop kanban board, and — the part that makes it a product rather than a
 to-do list — **statuses and fields each company defines for itself**. Roughly
 what Monday.com and ActiveCollab do, scoped to what a Greek SME actually needs.
 
-The landing page has advertised this as "Σύντομα" since the CvTech rebrand.
+The landing page has advertised this as "Σύντομα" since the CVCorp rebrand.
 
 ### Decisions taken
 

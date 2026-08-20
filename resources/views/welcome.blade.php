@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CvTech — {{ __('Διαχείριση αδειών προσωπικού') }}</title>
+    <title>CVCorp — {{ __('Διαχείριση αδειών προσωπικού') }}</title>
     <meta name="description" content="{{ __('Πλατφόρμα διαχείρισης αδειών προσωπικού, με αυτόματο υπολογισμό δικαιώματος κατά την ελληνική νομοθεσία.') }}">
     <link rel="icon" href="{{ asset('img/brand/favicon.svg') }}" type="image/svg+xml">
 
@@ -192,7 +192,7 @@
     <div class="wrap nav">
         <a href="#" class="brand">
             {!! $mark !!}
-            <span class="brand-name">Cv<span>Tech</span></span>
+            <span class="brand-name">CV<span>Corp</span></span>
         </a>
         <nav class="nav-links">
             <a href="#products">{{ __('Υπηρεσίες') }}</a>
@@ -224,7 +224,7 @@
             <span class="pill"><span class="dot"></span>{{ __('Φτιαγμένο για ελληνικές επιχειρήσεις') }}</span>
             <h1>{{ __('Οι άδειες της ομάδας σου,') }} <em>{{ __('χωρίς υπολογισμούς στο χέρι.') }}</em></h1>
             <p class="lead">
-                {{ __('Το CvTech υπολογίζει αυτόματα το δικαίωμα άδειας κάθε υπαλλήλου βάσει του Α.Ν. 539/1945, κρατάει τα υπόλοιπα ενημερωμένα και δίνει στη διοίκηση εικόνα σε πραγματικό χρόνο.') }}
+                {{ __('Το CVCorp υπολογίζει αυτόματα το δικαίωμα άδειας κάθε υπαλλήλου βάσει του Α.Ν. 539/1945, κρατάει τα υπόλοιπα ενημερωμένα και δίνει στη διοίκηση εικόνα σε πραγματικό χρόνο.') }}
             </p>
             <div class="hero-cta">
                 <a href="{{ url('/admin') }}" class="btn btn-primary btn-lg">{{ __('Σύνδεση στην πλατφόρμα') }}</a>
@@ -237,7 +237,7 @@
             <figure class="shot" style="margin:0;">
                 <div class="shot-bar"><span></span><span></span><span></span></div>
                 <img src="{{ $shot('app-dashboard') }}"
-                     alt="{{ __('Ο πίνακας ελέγχου του CvTech: υπόλοιπα αδειών ανά τύπο και ημερολόγιο ομάδας.') }}"
+                     alt="{{ __('Ο πίνακας ελέγχου του CVCorp: υπόλοιπα αδειών ανά τύπο και ημερολόγιο ομάδας.') }}"
                      loading="lazy" width="1600" height="786">
             </figure>
         </div>
@@ -372,7 +372,7 @@
         <figure class="shot" style="margin: 0;">
             <div class="shot-bar"><span></span><span></span><span></span></div>
             <img src="{{ $shot('kanban-board') }}"
-                 alt="{{ __('Πίνακας έργου στο CvTech: εργασίες σε στήλες, με προτεραιότητα, προθεσμία και ανάθεση σε κάθε κάρτα.') }}"
+                 alt="{{ __('Πίνακας έργου στο CVCorp: εργασίες σε στήλες, με προτεραιότητα, προθεσμία και ανάθεση σε κάθε κάρτα.') }}"
                  loading="lazy" width="1278" height="426">
         </figure>
     </div>
@@ -397,9 +397,9 @@
     <div class="wrap foot">
         <a href="#" class="brand">
             {!! $mark !!}
-            <span class="brand-name">Cv<span>Tech</span></span>
+            <span class="brand-name">CV<span>Corp</span></span>
         </a>
-        <p>© {{ date('Y') }} CvTech — {{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
+        <p>© {{ date('Y') }} CVCorp — {{ __('Σύστημα διαχείρισης αδειών προσωπικού') }}</p>
     </div>
 </footer>
 

@@ -26,7 +26,7 @@
 <body>
 
 <div class="header">
-    <p class="brand">CvTech</p>
+    <p class="brand">CVCorp</p>
     <p class="subtitle">{{ __('Αναφορά Αδειών Υπαλλήλου') }} — {{ $year }}</p>
 </div>
 
@@ -111,7 +111,7 @@
 </table>
 
 <div class="footer">
-    {{ __('Δημιουργήθηκε από το CvTech στις :date', ['date' => $generatedAt->format('d/m/Y H:i')]) }}
+    {{ __('Δημιουργήθηκε από το CVCorp στις :date', ['date' => $generatedAt->format('d/m/Y H:i')]) }}
 </div>
 
 </body>

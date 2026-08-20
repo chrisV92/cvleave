@@ -1,4 +1,4 @@
-# CvTech
+# CVCorp
 
 A multi-tenant business platform for Greek companies: leave management and
 project/task management in one panel.
